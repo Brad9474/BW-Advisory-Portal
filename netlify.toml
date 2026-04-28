@@ -9,6 +9,12 @@
   to = "/public/:splat"
   status = 200
 
+# Serve internal portal pages as static files
+[[redirects]]
+  from = "/internal/*"
+  to = "/internal/:splat"
+  status = 200
+
 # Redirect portal root to main website diagnostics hub
 # External users discover diagnostics on the website, not the portal
 [[redirects]]
