@@ -1,0 +1,40 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+# Redirect portal root to main website diagnostics hub
+# External users discover diagnostics on the website, not the portal
+[[redirects]]
+  from = "/"
+  to = "https://bwadvisorysolutions.com.au/diagnostics"
+  status = 301
+  force = true
+
+# Security headers for all portal pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+# Cache logo and other static assets aggressively (immutable content)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# No cache for diagnostic forms (dynamic content)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+# No cache for API endpoints
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"

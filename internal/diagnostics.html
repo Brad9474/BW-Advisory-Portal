@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Approvals — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Nav ── */
+.nav { background: #0A1C42; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.nav-tag { background: rgba(27,110,194,0.35); color: #7aaee8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-left: 12px; }
+.nav-links { display: flex; align-items: center; gap: 20px; }
+.nav-link { color: #EBF3FA; font-size: 13px; text-decoration: none; opacity: 0.75; }
+.nav-link:hover { opacity: 1; }
+.nav-link.active { opacity: 1; font-weight: 600; }
+.btn-signout { background: none; border: 1px solid rgba(255,255,255,0.2); color: #EBF3FA; font-size: 12px; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+.btn-signout:hover { background: rgba(255,255,255,0.1); }
+
+/* ── Page ── */
+.page { flex: 1; padding: 40px 48px; }
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+.page-title { font-size: 22px; font-weight: 700; color: #0A1C42; }
+.page-sub { font-size: 13px; color: #6a7a8a; margin-top: 4px; }
+.btn-refresh { background: none; border: 1.5px solid #dde4ed; color: #0A1C42; font-size: 13px; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 600; }
+.btn-refresh:hover { background: #EBF3FA; }
+
+/* ── Cards ── */
+.diag-list { display: flex; flex-direction: column; gap: 16px; }
+.diag-card {
+  background: #fff; border-radius: 10px; border: 1px solid #dde4ed; overflow: hidden;
+}
+.diag-card-header {
+  padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none; transition: background 0.15s;
+}
+.diag-card-header:hover { background: #fafbfd; }
+.diag-prospect { flex: 1; }
+.diag-name { font-size: 16px; font-weight: 700; color: #0A1C42; }
+.diag-meta { font-size: 13px; color: #6a7a8a; margin-top: 3px; }
+.diag-header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.diag-time { font-size: 12px; color: #9aaabb; }
+.chevron { font-size: 14px; color: #9aaabb; transition: transform 0.2s; }
+.diag-card.expanded .chevron { transform: rotate(180deg); }
+
+/* ── Badges ── */
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.badge-pending  { background: #fff7e6; color: #b7620a; }
+.badge-sent     { background: #e8f5e9; color: #2e7d32; }
+.badge-rejected { background: #fde9e7; color: #c0392b; }
+.badge-archived { background: #f0f3f7; color: #9aaabb; }
+.badge-strategic   { background: #EBF3FA; color: #1B6EC2; }
+.badge-operational { background: #f0ebfa; color: #6b3fa8; }
+
+/* ── Expanded body ── */
+.diag-body { display: none; border-top: 1px solid #f0f3f7; }
+.diag-card.expanded .diag-body { display: block; }
+
+.diag-headline {
+  padding: 20px 24px;
+  background: #EBF3FA; border-left: 4px solid #1B6EC2;
+  font-size: 15px; font-weight: 600; color: #0A1C42; line-height: 1.5;
+}
+.diag-sections { padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.diag-section-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #9aaabb; font-weight: 700; margin-bottom: 8px; }
+.diag-section-body { font-size: 13px; color: #444; line-height: 1.65; }
+.diag-section-body ul { padding-left: 16px; }
+.diag-section-body li { margin-bottom: 5px; }
+
+.diag-actions {
+  padding: 16px 24px; background: #f9fbfd;
+  border-top: 1px solid #f0f3f7;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.btn-approve {
+  background: #1B6EC2; color: #fff; border: none; border-radius: 7px;
+  padding: 10px 22px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: background 0.15s;
+}
+.btn-approve:hover { background: #155fa8; }
+.btn-approve:disabled { background: #C0C8D0; cursor: not-allowed; }
+.btn-reject {
+  background: none; border: 1.5px solid #dde4ed; color: #666;
+  border-radius: 7px; padding: 10px 18px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn-reject:hover { border-color: #c0392b; color: #c0392b; background: #fde9e7; }
+.btn-reject:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-archive {
+  background: none; border: 1.5px solid #dde4ed; color: #9aaabb;
+  border-radius: 7px; padding: 10px 18px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.15s; margin-left: auto;
+}
+.btn-archive:hover { border-color: #9aaabb; background: #f5f7fa; color: #666; }
+.btn-delete {
+  background: none; border: 1.5px solid #e0c0c0; color: #c0392b;
+  border-radius: 7px; padding: 10px 18px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn-delete:hover { background: #fde9e7; }
+.action-status { font-size: 13px; color: #6a7a8a; }
+
+/* ── Report preview toggle ── */
+.preview-toggle {
+  background: none; border: none; color: #1B6EC2; font-size: 13px;
+  font-weight: 600; cursor: pointer; font-family: inherit; padding: 0;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.report-preview { display: none; padding: 0 24px 20px; }
+.report-preview.visible { display: block; }
+.report-iframe { width: 100%; height: 600px; border: 1px solid #dde4ed; border-radius: 6px; }
+
+/* ── Empty / loading ── */
+.state-msg { padding: 56px 24px; text-align: center; color: #9aaabb; font-size: 15px; }
+
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; }
+  .page { padding: 24px 16px; }
+  .diag-sections { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div style="display:flex;align-items:center;">
+    <a href="/internal/" class="nav-brand">BW Advisory Solutions</a>
+    <span class="nav-tag">Internal</span>
+  </div>
+  <div class="nav-links">
+    <a href="/internal/" class="nav-link">Dashboard</a>
+    <a href="/internal/intakes.html" class="nav-link">Intakes</a>
+    <a href="/internal/diagnostics.html" class="nav-link active">Diagnostics</a>
+    <a href="/internal/clients.html" class="nav-link">Clients</a>
+    <a href="/internal/documents.html" class="nav-link">Documents</a>
+    <a href="/internal/invoices.html" class="nav-link">Invoices</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Diagnostic Approvals</div>
+      <div class="page-sub">Review generated reports before they are sent to prospects.</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <label style="font-size:13px;color:#6a7a8a;display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="show-archived" onchange="loadDiagnostics()" style="cursor:pointer;">
+        Show archived
+      </label>
+      <button class="btn-refresh" onclick="loadDiagnostics()">&#8635; Refresh</button>
+    </div>
+  </div>
+
+  <div class="diag-list" id="diag-list">
+    <div class="state-msg">Loading…</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+
+function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
+function signOut() { sessionStorage.removeItem('brad_api_key'); location.href = '/internal/'; }
+
+if (!getKey()) location.href = '/internal/';
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleString('en-AU', {
+      timeZone: 'Australia/Perth', day: 'numeric', month: 'short',
+      year: 'numeric', hour: '2-digit', minute: '2-digit',
+    }) + ' AWST';
+  } catch { return iso; }
+}
+
+const statusBadge = {
+  pending:  '<span class="badge badge-pending">Pending approval</span>',
+  sent:     '<span class="badge badge-sent">Report sent</span>',
+  rejected: '<span class="badge badge-rejected">Rejected</span>',
+  archived: '<span class="badge badge-archived">Archived</span>',
+};
+
+async function loadDiagnostics() {
+  const list = document.getElementById('diag-list');
+  list.innerHTML = '<div class="state-msg">Loading…</div>';
+  try {
+    const res = await fetch(`${API}?action=get-diagnostics`, {
+      headers: { 'x-portal-api-key': getKey() }
+    });
+    if (res.status === 401) { signOut(); return; }
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    const showArchived = document.getElementById('show-archived')?.checked;
+    const filtered = showArchived
+      ? json.diagnostics
+      : json.diagnostics.filter(d => d.status !== 'archived');
+    renderDiagnostics(filtered);
+  } catch (e) {
+    list.innerHTML = `<div class="state-msg">Failed to load: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderDiagnostics(diags) {
+  const list = document.getElementById('diag-list');
+  if (!diags.length) {
+    list.innerHTML = '<div class="state-msg">No diagnostic submissions yet.</div>';
+    return;
+  }
+
+  list.innerHTML = diags.map(d => {
+    const r = d.report?.data || {};
+    const isPending = d.status === 'pending';
+    const diagType = d.diagType || d.report?.diagType || 'strategic';
+    const isOperational = diagType === 'operational';
+    const typeBadge = isOperational
+      ? '<span class="badge badge-operational">Operational</span>'
+      : '<span class="badge badge-strategic">Strategic</span>';
+    const section1Title = isOperational ? 'Operational Reality' : 'Strategic Reality';
+
+    const findings = (r.section1_findings || []).map(f => `<li>${esc(f)}</li>`).join('');
+    const secondary = (r.section2_secondary || []).map(s => `<li>${esc(s)}</li>`).join('');
+    const steps = (r.section3_steps || []).map(s => `<li>${esc(s)}</li>`).join('');
+
+    return `
+    <div class="diag-card" id="card-${esc(d.id)}">
+      <div class="diag-card-header" onclick="toggleCard('${esc(d.id)}')">
+        <div class="diag-prospect">
+          <div class="diag-name">${esc(d.prospect?.name)} &mdash; ${esc(d.prospect?.organisation)}</div>
+          <div class="diag-meta">${esc(d.prospect?.role)} &nbsp;·&nbsp; ${esc(d.prospect?.email)}</div>
+        </div>
+        <div class="diag-header-right">
+          ${typeBadge}
+          ${statusBadge[d.status] || esc(d.status)}
+          <span class="diag-time">${fmtDate(d.submittedAt)}</span>
+          <span class="chevron">&#8964;</span>
+        </div>
+      </div>
+
+      <div class="diag-body">
+
+        <div class="diag-headline">${esc(r.headline || '')}</div>
+
+        <div class="diag-sections">
+          <div>
+            <div class="diag-section-title">${section1Title}</div>
+            <div class="diag-section-body"><ul>${findings}</ul></div>
+          </div>
+          <div>
+            <div class="diag-section-title">Primary Constraint</div>
+            <div class="diag-section-body">${esc(r.section2_primary || '')}</div>
+          </div>
+          <div>
+            <div class="diag-section-title">Contributing Factors</div>
+            <div class="diag-section-body"><ul>${secondary}</ul></div>
+          </div>
+          <div>
+            <div class="diag-section-title">Root Cause Hypothesis</div>
+            <div class="diag-section-body">${esc(r.section2_hypothesis || '')}</div>
+          </div>
+          <div style="grid-column:1/-1;">
+            <div class="diag-section-title">Recommended Steps</div>
+            <div class="diag-section-body"><ul>${steps}</ul></div>
+          </div>
+          <div style="grid-column:1/-1;">
+            <div class="diag-section-title">Closing</div>
+            <div class="diag-section-body">${esc(r.section3_close || '')}</div>
+          </div>
+        </div>
+
+        <div style="padding:0 24px 16px;">
+          <button class="preview-toggle" onclick="togglePreview('${esc(d.id)}')">&#128196; Toggle full report preview</button>
+          <div class="report-preview" id="preview-${esc(d.id)}">
+            <iframe class="report-iframe" srcdoc="${esc(d.report?.html || '')}"></iframe>
+          </div>
+        </div>
+
+        <div class="diag-actions" id="actions-${esc(d.id)}">
+          ${isPending ? `
+            <button class="btn-approve" onclick="approve('${esc(d.id)}')">&#10003; Approve &amp; Send to ${esc(d.prospect?.name)}</button>
+            <button class="btn-reject" onclick="reject('${esc(d.id)}')">&#10007; Reject</button>
+          ` : `
+            <span class="action-status">
+              ${d.status === 'sent' ? `&#10003; Report sent ${fmtDate(d.sentAt)}` : d.status === 'archived' ? `Archived ${fmtDate(d.archivedAt)}` : `&#10007; Rejected ${fmtDate(d.rejectedAt)}`}
+            </span>
+          `}
+          <button class="btn-archive" onclick="archiveDiag('${esc(d.id)}')" ${d.status === 'archived' ? 'style="display:none;"' : ''} title="Archive">&#128193; Archive</button>
+          <button class="btn-delete" onclick="deleteDiag('${esc(d.id)}')" title="Permanently delete">&#128465; Delete</button>
+        </div>
+
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(id) {
+  document.getElementById(`card-${id}`)?.classList.toggle('expanded');
+}
+
+function togglePreview(id) {
+  document.getElementById(`preview-${id}`)?.classList.toggle('visible');
+}
+
+async function approve(id) {
+  if (!confirm('Send this report to the prospect now?')) return;
+
+  const approveBtn = document.querySelector(`#actions-${id} .btn-approve`);
+  const rejectBtn  = document.querySelector(`#actions-${id} .btn-reject`);
+  if (approveBtn) { approveBtn.disabled = true; approveBtn.textContent = 'Sending…'; }
+  if (rejectBtn)  rejectBtn.disabled = true;
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'approve-diagnostic', id }),
+    });
+    const json = await res.json();
+    if (!json.ok && res.status !== 409) throw new Error(json.error);
+    await loadDiagnostics();
+  } catch (e) {
+    alert('Failed to send report: ' + e.message);
+    if (approveBtn) { approveBtn.disabled = false; approveBtn.textContent = '✓ Approve & Send'; }
+    if (rejectBtn)  rejectBtn.disabled = false;
+  }
+}
+
+async function reject(id) {
+  if (!confirm('Reject this submission? No report will be sent.')) return;
+
+  const approveBtn = document.querySelector(`#actions-${id} .btn-approve`);
+  const rejectBtn  = document.querySelector(`#actions-${id} .btn-reject`);
+  if (approveBtn) approveBtn.disabled = true;
+  if (rejectBtn)  { rejectBtn.disabled = true; rejectBtn.textContent = 'Rejecting…'; }
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'reject-diagnostic', id }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    await loadDiagnostics();
+  } catch (e) {
+    alert('Failed to reject: ' + e.message);
+    if (approveBtn) approveBtn.disabled = false;
+    if (rejectBtn)  { rejectBtn.disabled = false; rejectBtn.textContent = '✗ Reject'; }
+  }
+}
+
+async function archiveDiag(id) {
+  if (!confirm('Archive this submission? It will be hidden from the main list.')) return;
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'archive-diagnostic', id }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    await loadDiagnostics();
+  } catch (e) {
+    alert('Failed to archive: ' + e.message);
+  }
+}
+
+async function deleteDiag(id) {
+  if (!confirm('Permanently delete this submission? This cannot be undone.')) return;
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'delete-diagnostic', id }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    await loadDiagnostics();
+  } catch (e) {
+    alert('Failed to delete: ' + e.message);
+  }
+}
+
+loadDiagnostics();
+</script>
+</body>
+</html>

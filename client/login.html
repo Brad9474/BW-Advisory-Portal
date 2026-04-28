@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Sign In — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Calibri', 'Segoe UI', 'Arial', sans-serif;
+  background: linear-gradient(135deg, #0F172A 0%, #051020 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px 48px;
+}
+
+.brand { text-align: center; margin-bottom: 40px; text-decoration: none; display: block; }
+.brand-name { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+.brand-tagline { font-size: 12px; color: #C9A84C; margin-top: 6px; letter-spacing: 0.1em; font-weight: 600; }
+
+.card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+.card-header { background: rgba(201, 168, 76, 0.05); padding: 28px 32px; border-bottom: 1px solid rgba(201, 168, 76, 0.1); }
+.card-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #C9A84C; font-weight: 700; margin-bottom: 8px; }
+.card-title { color: #fff; font-size: 20px; font-weight: 700; }
+.card-sub { color: rgba(192, 200, 208, 0.6); font-size: 13px; margin-top: 4px; }
+.card-body { padding: 32px; }
+
+.field { margin-bottom: 20px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: #C0C8D0; margin-bottom: 8px; }
+.field input {
+  width: 100%; padding: 12px 14px;
+  border: 1.5px solid rgba(201, 168, 76, 0.3); border-radius: 8px;
+  font-size: 15px; font-family: inherit; color: #fff;
+  background: rgba(255, 255, 255, 0.05); transition: all 0.2s;
+}
+.field input::placeholder { color: rgba(192, 200, 208, 0.5); }
+.field input:focus { outline: none; border-color: #C9A84C; background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15); }
+.field.has-error input { border-color: #ef4444; }
+.field-err { font-size: 12px; color: #ef4444; margin-top: 5px; display: none; }
+.field.has-error .field-err { display: block; }
+
+.btn-submit {
+  width: 100%; background: #C9A84C; color: #0F172A;
+  border: none; border-radius: 8px; padding: 14px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: all 0.2s; margin-top: 8px;
+}
+.btn-submit:hover { background: #E0BC60; box-shadow: 0 8px 24px rgba(201, 168, 76, 0.3); }
+.btn-submit:disabled { background: rgba(201, 168, 76, 0.5); cursor: not-allowed; }
+
+.divider { border: none; border-top: 1px solid rgba(201, 168, 76, 0.1); margin: 24px 0; }
+
+.no-access {
+  text-align: center;
+  font-size: 13px;
+  color: rgba(192, 200, 208, 0.7);
+  line-height: 1.8;
+}
+.no-access a { color: #C9A84C; text-decoration: none; font-weight: 600; }
+.no-access a:hover { text-decoration: underline; }
+
+.footer-link { text-align: center; margin-top: 24px; font-size: 13px; color: rgba(192, 200, 208, 0.6); }
+.footer-link a { color: #C9A84C; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<a href="https://bwadvisorysolutions.com.au" class="brand">
+  <div class="brand-name">BW Advisory Solutions</div>
+  <div class="brand-tagline">Client Portal</div>
+</a>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-label">Client Portal</div>
+    <div class="card-title">Sign in to your portal</div>
+    <div class="card-sub">BW Advisory Solutions — restricted access</div>
+  </div>
+  <div class="card-body">
+
+    <div class="field" id="f-email">
+      <label for="email">Email address</label>
+      <input type="email" id="email" placeholder="you@yourorganisation.com" autocomplete="email">
+      <div class="field-err" id="email-err">Please enter a valid email address.</div>
+    </div>
+
+    <div class="field" id="f-password">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
+      <div class="field-err" id="password-err">Incorrect email or password.</div>
+    </div>
+
+    <button class="btn-submit" id="btn-submit" onclick="login()">Sign in</button>
+
+    <hr class="divider">
+
+    <div class="no-access">
+      First time here, or need a new access link?<br>
+      Contact <a href="mailto:brad@bwadvisorysolutions.com.au">brad@bwadvisorysolutions.com.au</a>
+      and Brad will send you a fresh link.
+    </div>
+
+  </div>
+</div>
+
+<div class="footer-link">
+  Need help? <a href="mailto:brad@bwadvisorysolutions.com.au">brad@bwadvisorysolutions.com.au</a>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+
+// If already signed in, go straight to portal
+const existingSession = localStorage.getItem('bw_client_session');
+if (existingSession) {
+  fetch(`${API}?action=verify-client-session&sessionToken=${encodeURIComponent(existingSession)}`)
+    .then(r => r.json())
+    .then(j => { if (j.ok) window.location.replace('/client/'); })
+    .catch(() => {});
+}
+
+async function login() {
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  clearErrors();
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setErr('f-email', 'email-err', true);
+    return;
+  }
+  if (!password) {
+    setErr('f-password', 'password-err', true, 'Please enter your password.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled    = true;
+  btn.textContent = 'Signing in…';
+
+  try {
+    const res  = await fetch(API, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ action: 'client-login', email, password }),
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      setErr('f-password', 'password-err', true, json.error || 'Incorrect email or password.');
+      btn.disabled    = false;
+      btn.textContent = 'Sign in';
+      return;
+    }
+
+    localStorage.setItem('bw_client_session', json.sessionToken);
+    window.location.replace('/client/');
+
+  } catch {
+    setErr('f-password', 'password-err', true, 'Connection error. Please try again.');
+    btn.disabled    = false;
+    btn.textContent = 'Sign in';
+  }
+}
+
+function clearErrors() {
+  ['f-email','f-password'].forEach(id => {
+    document.getElementById(id).classList.remove('has-error');
+  });
+}
+
+function setErr(fieldId, errId, show, msg) {
+  document.getElementById(fieldId).classList.toggle('has-error', show);
+  if (msg) document.getElementById(errId).textContent = msg;
+}
+
+document.getElementById('email')   .addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('password').focus(); });
+document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+</script>
+</body>
+</html>

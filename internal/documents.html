@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documents — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; }
+.nav { background: #0A1C42; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.nav-tag { background: rgba(27,110,194,0.35); color: #7aaee8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-left: 12px; }
+.nav-links { display: flex; align-items: center; gap: 16px; }
+.nav-link { color: #EBF3FA; font-size: 13px; text-decoration: none; opacity: 0.75; white-space: nowrap; }
+.nav-link:hover, .nav-link.active { opacity: 1; font-weight: 600; }
+.btn-signout { background: none; border: 1px solid rgba(255,255,255,0.2); color: #EBF3FA; font-size: 12px; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+.btn-signout:hover { background: rgba(255,255,255,0.1); }
+.page { flex: 1; padding: 40px 48px; }
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+.page-title { font-size: 22px; font-weight: 700; color: #0A1C42; }
+.page-sub { font-size: 13px; color: #6a7a8a; margin-top: 4px; }
+.btn-primary { background: #1B6EC2; color: #fff; border: none; border-radius: 7px; padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+.btn-primary:hover { background: #155fa8; }
+.btn-primary:disabled { background: #C0C8D0; cursor: not-allowed; }
+
+/* Upload form */
+.upload-form { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; padding: 24px 28px; margin-bottom: 28px; display: none; }
+.upload-form.open { display: block; }
+.form-title { font-size: 15px; font-weight: 700; color: #0A1C42; margin-bottom: 18px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 6px; }
+.field select, .field textarea { width: 100%; padding: 10px 13px; border: 1.5px solid #dde4ed; border-radius: 6px; font-size: 14px; font-family: inherit; color: #1a1a2e; background: #fafbfc; }
+.field select:focus, .field textarea:focus { outline: none; border-color: #1B6EC2; background: #fff; }
+.field textarea { height: 80px; resize: vertical; line-height: 1.5; }
+.field.has-error select { border-color: #c0392b; }
+.field-err { font-size: 12px; color: #c0392b; margin-top: 4px; display: none; }
+.field.has-error .field-err { display: block; }
+
+/* Drop zone */
+.drop-zone {
+  border: 2px dashed #dde4ed; border-radius: 8px; padding: 32px 20px;
+  text-align: center; cursor: pointer; transition: all 0.18s; background: #fafbfc;
+  grid-column: 1 / -1;
+}
+.drop-zone:hover, .drop-zone.dragover { border-color: #1B6EC2; background: #EBF3FA; }
+.drop-zone-icon { font-size: 28px; margin-bottom: 10px; color: #1B6EC2; }
+.drop-zone-text { font-size: 14px; color: #6a7a8a; }
+.drop-zone-text strong { color: #1B6EC2; cursor: pointer; }
+.drop-zone-hint { font-size: 12px; color: #9aaabb; margin-top: 6px; }
+.file-selected { background: #EBF3FA; border-color: #1B6EC2; }
+.file-name { font-size: 13px; font-weight: 700; color: #0A1C42; margin-top: 6px; }
+
+
+/* Size warning */
+.size-warning {
+  background: #fff7e6; border: 1px solid #f5c842; border-radius: 6px;
+  padding: 10px 14px; font-size: 13px; color: #7a5000;
+  grid-column: 1 / -1; display: none;
+}
+.size-warning.visible { display: block; }
+.size-error {
+  background: #fde9e7; border: 1px solid #e74c3c; border-radius: 6px;
+  padding: 10px 14px; font-size: 13px; color: #c0392b;
+  grid-column: 1 / -1; display: none;
+}
+.size-error.visible { display: block; }
+
+.form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn-cancel { background: none; border: 1.5px solid #dde4ed; color: #666; border-radius: 7px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-cancel:hover { background: #f5f7fa; }
+
+/* Send modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,28,66,0.45); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 12px; padding: 28px 32px; width: 100%; max-width: 480px; box-shadow: 0 8px 40px rgba(10,28,66,0.18); }
+.modal-title { font-size: 17px; font-weight: 700; color: #0A1C42; margin-bottom: 16px; }
+.modal-label { font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 6px; }
+.modal textarea { width: 100%; padding: 10px 13px; border: 1.5px solid #dde4ed; border-radius: 6px; font-size: 14px; font-family: inherit; height: 100px; resize: vertical; line-height: 1.5; }
+.modal textarea:focus { outline: none; border-color: #1B6EC2; }
+.modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+.btn-send { background: #1B6EC2; color: #fff; border: none; border-radius: 7px; padding: 10px 22px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-send:hover { background: #155fa8; }
+.btn-send:disabled { background: #C0C8D0; cursor: not-allowed; }
+
+/* Table */
+.table-wrap { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: #f5f7fa; }
+th { padding: 11px 16px; font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; text-align: left; border-bottom: 1px solid #eef0f5; }
+td { padding: 13px 16px; font-size: 14px; color: #2c2c3e; border-bottom: 1px solid #f0f3f7; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafbfd; }
+.doc-name { font-weight: 600; color: #0A1C42; }
+.doc-size { font-size: 12px; color: #9aaabb; margin-top: 2px; }
+.badge-uploaded { background: #EBF3FA; color: #1B6EC2; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.badge-sent { background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.btn-action { background: none; border: 1.5px solid #dde4ed; color: #0A1C42; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.btn-action:hover { background: #EBF3FA; border-color: #1B6EC2; color: #1B6EC2; }
+.btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-analytics { background: none; border: 1.5px solid #dde4ed; color: #0A1C42; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.btn-analytics:hover { background: #EBF3FA; border-color: #1B6EC2; color: #1B6EC2; }
+.analytics-row td { padding: 0; background: #f9fbff; }
+.analytics-panel { padding: 14px 24px; display: flex; gap: 32px; flex-wrap: wrap; border-top: 1px solid #eef0f5; }
+.stat-tile { text-align: center; min-width: 60px; }
+.stat-val { font-size: 22px; font-weight: 700; color: #0A1C42; line-height: 1; }
+.stat-val.small { font-size: 14px; }
+.stat-label { font-size: 11px; color: #6a7a8a; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.state-msg { padding: 56px 24px; text-align: center; color: #9aaabb; font-size: 15px; }
+
+/* Session log */
+.session-log { width: 100%; margin-top: 14px; border-top: 1px solid #eef0f5; padding-top: 12px; }
+.session-log-title { font-size: 11px; font-weight: 700; color: #6a7a8a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.session-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.session-table th { font-size: 10px; font-weight: 700; color: #9aaabb; text-transform: uppercase; letter-spacing: 0.8px; padding: 4px 8px; text-align: left; border-bottom: 1px solid #eef0f5; }
+.session-table td { padding: 6px 8px; color: #2c2c3e; border-bottom: 1px solid #f5f7fa; vertical-align: middle; }
+.session-table tr:last-child td { border-bottom: none; }
+.session-flag { font-size: 13px; margin-right: 4px; }
+.session-unknown { color: #b0bec5; font-style: italic; }
+
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; } .page { padding: 24px 16px; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div style="display:flex;align-items:center;">
+    <a href="/internal/" class="nav-brand">BW Advisory Solutions</a>
+    <span class="nav-tag">Internal</span>
+  </div>
+  <div class="nav-links">
+    <a href="/internal/" class="nav-link">Dashboard</a>
+    <a href="/internal/intakes.html" class="nav-link">Intakes</a>
+    <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
+    <a href="/internal/clients.html" class="nav-link">Clients</a>
+    <a href="/internal/documents.html" class="nav-link active">Documents</a>
+    <a href="/internal/invoices.html" class="nav-link">Invoices</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Documents</div>
+      <div class="page-sub">Upload and deliver documents to clients.</div>
+    </div>
+    <button class="btn-primary" onclick="toggleUpload()">+ Upload Document</button>
+  </div>
+
+  <div class="upload-form" id="upload-form">
+    <div class="form-title">Upload Document</div>
+    <div class="form-grid">
+      <div class="field" id="f-client" style="grid-column:1/-1;">
+        <label>Client *</label>
+        <select id="doc-client" onchange="onClientChange()">
+          <option value="">Select a client…</option>
+        </select>
+        <div class="field-err">Please select a client.</div>
+      </div>
+
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <div class="drop-zone-icon">&#128196;</div>
+        <div class="drop-zone-text">Drop file here or <strong>browse</strong></div>
+        <div class="drop-zone-hint">PDF, DOCX, XLSX, PPTX · Max 4 MB &nbsp;|&nbsp; HTML — no limit</div>
+        <div class="file-name" id="file-name-display" style="display:none;"></div>
+        <input type="file" id="file-input" style="display:none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.html,.htm" onchange="onFileSelected(this)">
+      </div>
+
+
+      <div class="size-warning" id="size-warning">
+        &#9888; This file is larger than 3 MB. Upload may be slow. Files over 4 MB will be rejected.
+      </div>
+      <div class="size-error" id="size-error">
+        &#10007; File exceeds the 4 MB limit and cannot be uploaded. Please compress or split the document before uploading.
+      </div>
+
+      <div class="field" style="grid-column:1/-1;">
+        <label>Cover message <span style="font-weight:400;color:#9aaabb;font-size:12px;">(optional — included in the email body)</span></label>
+        <textarea id="doc-message" placeholder="e.g. Please find attached the draft engagement letter for your review…"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" id="btn-upload" onclick="uploadDocument()" disabled>Upload &amp; Save</button>
+      <button class="btn-cancel" onclick="toggleUpload()">Cancel</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Document</th><th>Client</th><th>Status</th><th>Uploaded</th><th>Engagement</th><th></th></tr>
+      </thead>
+      <tbody id="docs-body">
+        <tr><td colspan="6" class="state-msg">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Send modal -->
+<div class="modal-overlay" id="send-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Send Document</div>
+    <div class="modal-label">Email message</div>
+    <textarea id="modal-message" placeholder="Optional message to include in the email body…"></textarea>
+    <div class="modal-actions">
+      <button class="btn-send" id="btn-send" onclick="confirmSend()">Send to Client</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+const MAX_SIZE = 4 * 1024 * 1024; // 4MB
+const WARN_SIZE = 3 * 1024 * 1024; // 3MB warn threshold
+
+function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
+function signOut() { sessionStorage.removeItem('brad_api_key'); location.href = '/internal/'; }
+if (!getKey()) location.href = '/internal/';
+
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso) { try { return new Date(iso).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); } catch { return iso||'—'; } }
+function fmtSize(bytes) { if (!bytes) return ''; return bytes < 1024*1024 ? `${(bytes/1024).toFixed(0)} KB` : `${(bytes/1024/1024).toFixed(1)} MB`; }
+
+let formOpen = false;
+let selectedFile = null;
+let pendingSendId = null;
+let clientsMap = {};
+let docsMap = {};
+
+function toggleUpload() {
+  formOpen = !formOpen;
+  document.getElementById('upload-form').classList.toggle('open', formOpen);
+  if (formOpen) loadClientsIntoSelect();
+}
+
+async function loadClientsIntoSelect() {
+  const sel = document.getElementById('doc-client');
+  try {
+    const res = await fetch(`${API}?action=get-clients`, { headers: { 'x-portal-api-key': getKey() } });
+    const json = await res.json();
+    clientsMap = {};
+    sel.innerHTML = '<option value="">Select a client…</option>';
+    (json.clients || []).forEach(c => {
+      clientsMap[c.id] = c;
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = `${c.name}${c.organisation ? ' — ' + c.organisation : ''}`;
+      sel.appendChild(opt);
+    });
+  } catch {}
+}
+
+function onClientChange() {
+  document.getElementById('f-client').classList.remove('has-error');
+  checkUploadReady();
+}
+
+function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
+function onDragLeave()  { document.getElementById('drop-zone').classList.remove('dragover'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files?.[0];
+  if (file) applyFile(file);
+}
+function onFileSelected(input) { if (input.files?.[0]) applyFile(input.files[0]); }
+
+function isHtmlFile(file) {
+  return /\.html?$/i.test(file.name) || file.type === 'text/html';
+}
+
+function applyFile(file) {
+  selectedFile = file;
+  const nameEl = document.getElementById('file-name-display');
+  nameEl.textContent = `${file.name} (${fmtSize(file.size)})`;
+  nameEl.style.display = 'block';
+  document.getElementById('drop-zone').classList.add('file-selected');
+  // HTML files bypass the size limit — only warn/block for other types
+  const overWarn  = !isHtmlFile(file) && file.size > WARN_SIZE && file.size <= MAX_SIZE;
+  const overLimit = !isHtmlFile(file) && file.size > MAX_SIZE;
+  document.getElementById('size-warning').classList.toggle('visible', overWarn);
+  document.getElementById('size-error').classList.toggle('visible', overLimit);
+  checkUploadReady();
+}
+
+function checkUploadReady() {
+  const clientOk = !!document.getElementById('doc-client').value;
+  const fileOk   = selectedFile && (isHtmlFile(selectedFile) || selectedFile.size <= MAX_SIZE);
+  document.getElementById('btn-upload').disabled = !(clientOk && fileOk);
+}
+
+async function uploadDocument() {
+  const clientId = document.getElementById('doc-client').value;
+  if (!clientId) { document.getElementById('f-client').classList.add('has-error'); return; }
+  if (!selectedFile) return;
+  if (!isHtmlFile(selectedFile) && selectedFile.size > MAX_SIZE) return;
+
+  const client = clientsMap[clientId];
+  const btn = document.getElementById('btn-upload');
+  btn.disabled = true; btn.textContent = 'Uploading…';
+
+  try {
+    const base64 = await fileToBase64(selectedFile);
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({
+        action:        'add-document',
+        clientId,
+        clientName:    client?.name || '',
+        clientEmail:   client?.email || '',
+        fileName:      selectedFile.name,
+        fileType:      selectedFile.type || 'application/octet-stream',
+        fileBase64:    base64,
+        sizeBytes:     selectedFile.size,
+        coverMessage:  document.getElementById('doc-message').value.trim(),
+      }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+
+    selectedFile = null;
+    document.getElementById('file-name-display').style.display = 'none';
+    document.getElementById('drop-zone').classList.remove('file-selected');
+    document.getElementById('doc-message').value = '';
+    document.getElementById('doc-client').value = '';
+    document.getElementById('size-warning').classList.remove('visible');
+    toggleUpload();
+    await loadDocs();
+  } catch (e) {
+    alert('Upload failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Upload & Save';
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function openSendModal(id) {
+  const doc = docsMap[id];
+  if (!doc) return;
+  pendingSendId = id;
+  document.getElementById('modal-title').textContent = `Send to ${doc.clientName}`;
+  document.getElementById('modal-message').value = doc.coverMessage || `Please find attached ${doc.fileName} from BW Advisory Solutions.`;
+  document.getElementById('send-modal').classList.add('open');
+}
+function closeModal() { document.getElementById('send-modal').classList.remove('open'); pendingSendId = null; }
+
+async function confirmSend() {
+  if (!pendingSendId) return;
+  const message = document.getElementById('modal-message').value.trim();
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'send-document', id: pendingSendId, message }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    closeModal();
+    await loadDocs();
+  } catch (e) {
+    alert('Failed to send: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send to Client';
+  }
+}
+
+// ── View / Delete ─────────────────────────────────────────────────────────────
+
+async function viewDoc(id, fileName, fileType) {
+  try {
+    const res  = await fetch(`${API}?action=get-document-file&id=${encodeURIComponent(id)}`, { headers: { 'x-portal-api-key': getKey() } });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+
+    // URL-only doc (HTML)
+    if (json.fileUrl) { window.open(json.fileUrl, '_blank', 'noopener'); return; }
+
+    const byteChars   = atob(json.fileBase64);
+    const byteNumbers = new Uint8Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+    const blob = new Blob([byteNumbers], { type: json.fileType || 'application/octet-stream' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.target   = '_blank';
+    a.rel      = 'noopener';
+    if (json.fileType === 'application/pdf') {
+      a.click();
+    } else {
+      a.download = json.fileName || fileName;
+      a.click();
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  } catch (e) {
+    alert('Failed to load file: ' + e.message);
+  }
+}
+
+async function deleteDoc(id, fileName) {
+  if (!confirm(`Delete "${fileName}"? This cannot be undone.`)) return;
+  try {
+    const res  = await fetch(API, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body:    JSON.stringify({ action: 'delete-document', id }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    await loadDocs();
+  } catch (e) {
+    alert('Delete failed: ' + e.message);
+  }
+}
+
+// ── Analytics helpers ─────────────────────────────────────────────────────────
+
+function aggregateEvents(events, docId) {
+  const docEvents = events.filter(e => e.docId === docId);
+  if (!docEvents.length) return null;
+
+  const downloads     = docEvents.filter(e => e.type === 'download').length;
+  const previews      = docEvents.filter(e => e.type === 'preview_open').length;
+  const payments      = docEvents.filter(e => e.type === 'pay_now').length;
+  const emailOpens    = docEvents.filter(e => e.type === 'email_open').length;
+  const linkClicks    = docEvents.filter(e => e.type === 'link_click').length;
+  const closePairs    = docEvents.filter(e => e.type === 'preview_close' && typeof e.durationSeconds === 'number');
+  const totalSec      = closePairs.reduce((sum, e) => sum + e.durationSeconds, 0);
+  const totalPreviewMin = Math.round(totalSec / 60 * 10) / 10;
+
+  // Max scroll depth across all sessions
+  const scrollEvents  = docEvents.filter(e => e.scrollDepthPct != null);
+  const maxScrollPct  = scrollEvents.length ? Math.max(...scrollEvents.map(e => e.scrollDepthPct)) : null;
+
+  const timestamps  = docEvents.map(e => new Date(e.timestamp).getTime()).filter(t => !isNaN(t));
+  const lastAccessed = timestamps.length ? new Date(Math.max(...timestamps)).toISOString() : null;
+
+  const sessions  = new Set(docEvents.map(e => e.sessionId).filter(Boolean));
+
+  // Build per-session rows for the session log
+  const sessionMap = {};
+  for (const e of docEvents) {
+    if (!e.sessionId) continue;
+    if (!sessionMap[e.sessionId]) {
+      sessionMap[e.sessionId] = { sessionId: e.sessionId, openTime: null, duration: null, scrollDepthPct: null, country: e.country || null, ipAddress: e.ipAddress || null, userAgent: e.userAgent || null, linkClicks: [] };
+    }
+    const s = sessionMap[e.sessionId];
+    if (e.type === 'preview_open' && (!s.openTime || e.timestamp < s.openTime)) s.openTime = e.timestamp;
+    if (e.type === 'preview_close' && typeof e.durationSeconds === 'number') s.duration = e.durationSeconds;
+    if (e.type === 'preview_close' && e.scrollDepthPct != null) s.scrollDepthPct = e.scrollDepthPct;
+    if (e.type === 'link_click' && e.linkUrl) s.linkClicks.push(e.linkUrl);
+    if (!s.country && e.country) s.country = e.country;
+    if (!s.ipAddress && e.ipAddress) s.ipAddress = e.ipAddress;
+    if (!s.userAgent && e.userAgent) s.userAgent = e.userAgent;
+  }
+  const sessionLog = Object.values(sessionMap).sort((a, b) => (b.openTime || '').localeCompare(a.openTime || ''));
+
+  return { downloads, previews, payments, emailOpens, linkClicks, maxScrollPct, totalPreviewMin, lastAccessed, sessionCount: sessions.size, hasData: downloads > 0 || previews > 0 || payments > 0 || emailOpens > 0, sessionLog };
+}
+
+function parseDevice(ua) {
+  if (!ua) return 'Unknown device';
+  let os = 'Unknown OS';
+  if (/Windows NT/i.test(ua))       os = 'Windows';
+  else if (/Mac OS X/i.test(ua))    os = 'Mac';
+  else if (/iPhone/i.test(ua))      os = 'iPhone';
+  else if (/iPad/i.test(ua))        os = 'iPad';
+  else if (/Android/i.test(ua))     os = 'Android';
+  else if (/Linux/i.test(ua))       os = 'Linux';
+
+  let browser = 'Unknown browser';
+  if (/Edg\//i.test(ua))            browser = 'Edge';
+  else if (/OPR\//i.test(ua))       browser = 'Opera';
+  else if (/Chrome\//i.test(ua))    browser = 'Chrome';
+  else if (/Safari\//i.test(ua))    browser = 'Safari';
+  else if (/Firefox\//i.test(ua))   browser = 'Firefox';
+
+  return `${os} · ${browser}`;
+}
+
+function countryFlag(code) {
+  if (!code || code.length !== 2) return '';
+  // Convert country code to flag emoji (regional indicator symbols)
+  return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+}
+
+function renderAnalyticsPanel(m) {
+  const sessionRows = m.sessionLog.map(s => {
+    const when = s.openTime ? new Date(s.openTime).toLocaleString('en-AU', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true }) : '—';
+    const dur  = s.duration !== null ? (s.duration < 60 ? `${s.duration}s` : `${Math.round(s.duration/60)}m`) : '—';
+    const scroll = s.scrollDepthPct != null ? `<span style="font-size:11px;background:#EBF3FA;color:#1B6EC2;padding:1px 6px;border-radius:10px;">${s.scrollDepthPct}%</span>` : '—';
+    const flag = s.country ? countryFlag(s.country) : '';
+    const loc  = s.country
+      ? `<span class="session-flag">${flag}</span>${s.country}${s.ipAddress ? ' · ' + s.ipAddress : ''}`
+      : `<span class="session-unknown">Unknown</span>`;
+    const dev  = s.userAgent ? parseDevice(s.userAgent) : '<span class="session-unknown">Unknown</span>';
+    const links = s.linkClicks && s.linkClicks.length
+      ? s.linkClicks.map(u => { try { return new URL(u).hostname; } catch { return u.slice(0,40); } }).join(', ')
+      : '';
+    return `<tr><td>${when}</td><td>${dur}</td><td>${scroll}</td><td>${loc}</td><td>${dev}</td>${links ? `<td style="font-size:11px;color:#6a7a8a;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(s.linkClicks.join(', '))}">${links}</td>` : '<td>—</td>'}</tr>`;
+  }).join('');
+
+  const emailBadge = m.emailOpens > 0
+    ? `<div class="stat-tile"><div class="stat-val">${m.emailOpens}</div><div class="stat-label">Email Opens</div></div>`
+    : '';
+  const scrollBadge = m.maxScrollPct != null
+    ? `<div class="stat-tile"><div class="stat-val">${m.maxScrollPct}%</div><div class="stat-label">Max Scroll</div></div>`
+    : '';
+  const linksBadge = m.linkClicks > 0
+    ? `<div class="stat-tile"><div class="stat-val">${m.linkClicks}</div><div class="stat-label">Link Clicks</div></div>`
+    : '';
+
+  return `<div class="analytics-panel">
+    ${emailBadge}
+    <div class="stat-tile"><div class="stat-val">${m.previews}</div><div class="stat-label">Views</div></div>
+    ${scrollBadge}
+    <div class="stat-tile"><div class="stat-val">${m.totalPreviewMin}</div><div class="stat-label">Time (min)</div></div>
+    <div class="stat-tile"><div class="stat-val">${m.downloads}</div><div class="stat-label">Prints/DL</div></div>
+    <div class="stat-tile"><div class="stat-val">${m.payments}</div><div class="stat-label">Pay Clicks</div></div>
+    ${linksBadge}
+    <div class="stat-tile"><div class="stat-val">${m.sessionCount}</div><div class="stat-label">Sessions</div></div>
+    <div class="stat-tile"><div class="stat-val small">${m.lastAccessed ? fmtDate(m.lastAccessed) : '—'}</div><div class="stat-label">Last accessed</div></div>
+  </div>
+  ${sessionRows ? `<div class="session-log">
+    <div class="session-log-title">Session Log</div>
+    <table class="session-table">
+      <thead><tr><th>Opened</th><th>Duration</th><th>Scroll</th><th>Location</th><th>Device</th><th>Links Clicked</th></tr></thead>
+      <tbody>${sessionRows}</tbody>
+    </table>
+  </div>` : ''}`;
+}
+
+function toggleAnalytics(docId) {
+  const row = document.getElementById(`analytics-${docId}`);
+  if (!row) return;
+  row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+
+async function loadDocs() {
+  const tbody = document.getElementById('docs-body');
+  tbody.innerHTML = '<tr><td colspan="6" class="state-msg">Loading…</td></tr>';
+  try {
+    const [docsRes, eventsRes] = await Promise.all([
+      fetch(`${API}?action=get-documents`,       { headers: { 'x-portal-api-key': getKey() } }),
+      fetch(`${API}?action=get-document-events`, { headers: { 'x-portal-api-key': getKey() } }),
+    ]);
+    if (docsRes.status === 401) { signOut(); return; }
+    const docsJson   = await docsRes.json();
+    const eventsJson = eventsRes.ok ? await eventsRes.json() : { ok: false };
+    if (!docsJson.ok) throw new Error(docsJson.error);
+
+    const events = eventsJson.ok ? (eventsJson.events || []) : [];
+    renderDocs(docsJson.documents, events);
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" class="state-msg">Failed to load: ${esc(e.message)}</td></tr>`;
+  }
+}
+
+function renderDocs(docs, events) {
+  const tbody = document.getElementById('docs-body');
+  if (!docs.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="state-msg">No documents yet.</td></tr>'; return;
+  }
+  docsMap = {};
+  docs.forEach(d => { docsMap[d.id] = d; });
+  tbody.innerHTML = docs.map(d => {
+    const metrics = aggregateEvents(events, d.id);
+    const isExpired  = d.expiresAt && new Date() > new Date(d.expiresAt);
+    const expiryNote = d.expiresAt && !isExpired
+      ? `<span style="font-size:10px;color:#9aaabb;margin-top:2px;display:block;">Link expires ${fmtDate(d.expiresAt)}</span>`
+      : (isExpired ? `<span style="font-size:10px;color:#c0392b;margin-top:2px;display:block;">&#128274; Link expired</span>` : '');
+    const engagementCell = metrics && metrics.hasData
+      ? `<button class="btn-analytics" onclick="toggleAnalytics('${esc(d.id)}')">`
+        + `${metrics.emailOpens > 0 ? '&#9993;' + metrics.emailOpens + ' ' : ''}`
+        + `${metrics.previews}&#9741;`
+        + `${metrics.payments ? ' ' + metrics.payments + '&#128179;' : ''}`
+        + `</button>`
+      : `<span style="font-size:12px;color:#ccc;">No activity</span>`;
+
+    return `
+      <tr>
+        <td>
+          <div class="doc-name">${esc(d.fileName)}</div>
+          <div class="doc-size">${fmtSize(d.sizeBytes)}${expiryNote}</div>
+        </td>
+        <td>${esc(d.clientName)}<br><span style="font-size:12px;color:#9aaabb;">${esc(d.clientEmail)}</span></td>
+        <td>${d.status==='sent'
+          ? `<span class="badge-sent">Sent ${fmtDate(d.sentAt)}</span>`
+          : `<span class="badge-uploaded">Uploaded</span>`}</td>
+        <td>${fmtDate(d.uploadedAt)}</td>
+        <td>${engagementCell}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn-action" onclick="viewDoc('${esc(d.id)}','${esc(d.fileName)}','${esc(d.fileType)}')">View</button>
+          ${d.status !== 'sent'
+            ? ` <button class="btn-action" onclick="openSendModal('${esc(d.id)}')">Send</button>`
+            : ''}
+          <button class="btn-action" style="color:#c0392b;border-color:#e0c0c0;" onclick="deleteDoc('${esc(d.id)}','${esc(d.fileName)}')">Delete</button>
+        </td>
+      </tr>
+      <tr id="analytics-${esc(d.id)}" class="analytics-row" style="display:none;">
+        <td colspan="6">${metrics ? renderAnalyticsPanel(metrics) : ''}</td>
+      </tr>`;
+  }).join('');
+}
+
+loadDocs();
+</script>
+</body>
+</html>

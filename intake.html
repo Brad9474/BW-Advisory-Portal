@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation Intake — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F172A',
+                        accent: '#0369A1',
+                        gold: '#C9A84C',
+                        silver: '#C0C8D0',
+                        background: '#F5F4F0',
+                    },
+                    fontFamily: {
+                        display: ['Poppins', 'system-ui', 'sans-serif'],
+                        sans: ['Open Sans', 'system-ui', 'sans-serif'],
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        mono: ['Courier Prime', 'monospace'],
+                    },
+                    borderRadius: {
+                        '3xl': '2rem',
+                        '4xl': '3rem',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #C9A84C !important; }
+        .magnetic-button { transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .magnetic-button:hover { background-color: #E0BC60; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,168,76,0.4); }
+    </style>
+</head>
+<body class="bg-primary text-silver/80 font-sans min-h-screen overflow-x-hidden">
+
+    <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl px-4 pointer-events-none">
+        <div class="pointer-events-auto flex items-center justify-between px-8 py-4 rounded-full border border-white/5 backdrop-blur-2xl bg-primary/60 border-accent/20 shadow-[0_20px_50px_rgba(3,105,161,0.3)]">
+            <a href="https://bwadvisorysolutions.com.au" class="flex items-center gap-3 text-white font-bold text-sm tracking-wide uppercase">
+                <span>BW Advisory</span>
+            </a>
+            <div class="text-silver/60 text-xs font-mono tracking-widest uppercase">Consultation Intake</div>
+        </div>
+    </nav>
+
+    <div class="relative pt-40 pb-24 px-6 max-w-4xl mx-auto min-h-screen flex flex-col justify-center">
+        <div id="mount" class="w-full space-y-16">
+            <div class="space-y-6">
+                <p class="text-gold font-mono text-xs tracking-[0.2em] uppercase font-bold">Let's Talk Strategy & Operations</p>
+                <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1] text-white mb-6">
+                    Let's understand your challenge.
+                </h1>
+                <p class="text-xl md:text-2xl text-silver/75 font-light leading-relaxed max-w-2xl">
+                    Tell us about your organisation's challenge, constraints, and goals. This helps us prepare for a productive conversation.
+                </p>
+            </div>
+
+            <form id="intake-form" class="space-y-16 max-w-2xl pt-8">
+                <!-- Identity -->
+                <div class="space-y-8">
+                    <p class="text-accent/70 font-mono text-xs tracking-widest uppercase font-bold">Your Information</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">Full Name</label>
+                            <input type="text" name="name" required class="w-full bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all placeholder-silver/40" placeholder="Your name">
+                        </div>
+                        <div class="space-y-3">
+                            <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">Organisation</label>
+                            <input type="text" name="organisation" required class="w-full bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all placeholder-silver/40" placeholder="Company name">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">Role</label>
+                            <input type="text" name="role" required class="w-full bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all placeholder-silver/40" placeholder="Your role">
+                        </div>
+                        <div class="space-y-3">
+                            <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">Email</label>
+                            <input type="email" name="email" required class="w-full bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all placeholder-silver/40" placeholder="your@email.com">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">Phone Number</label>
+                            <div class="flex">
+                                <select name="country_code" class="w-[30%] bg-white/5 border-b-2 border-r-2 border-r-primary border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all appearance-none text-center">
+                                    <option value="+61" class="bg-primary text-white">🇦🇺 +61</option>
+                                    <option value="+64" class="bg-primary text-white">🇳🇿 +64</option>
+                                    <option value="+44" class="bg-primary text-white">🇬🇧 +44</option>
+                                    <option value="+1" class="bg-primary text-white">🇺🇸 +1</option>
+                                </select>
+                                <input type="tel" name="phone" required class="w-[70%] bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all placeholder-silver/40 pl-4" placeholder="0400 000 000">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Challenge -->
+                <div class="space-y-8">
+                    <p class="text-accent/70 font-mono text-xs tracking-widest uppercase font-bold">The Challenge</p>
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">What's your primary strategic or operational objective?</label>
+                            <textarea name="objective" required class="w-full bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all resize-none h-24 placeholder-silver/40" placeholder="What are you trying to achieve?"></textarea>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">What's blocking your progress?</label>
+                            <textarea name="constraint" required class="w-full bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all resize-none h-24 placeholder-silver/40" placeholder="Describe the primary constraint..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Engagement -->
+                <div class="space-y-8">
+                    <p class="text-accent/70 font-mono text-xs tracking-widest uppercase font-bold">Engagement Focus</p>
+                    <div class="space-y-3">
+                        <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">Which area interests you?</label>
+                        <select name="type" required class="w-full bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all appearance-none" onchange="this.value === 'other' ? document.getElementById('other-container').classList.remove('hidden') : document.getElementById('other-container').classList.add('hidden')">
+                            <option value="" disabled selected class="bg-primary text-white">Select an area of interest...</option>
+                            <option value="operational-diagnostic" class="bg-primary text-white">Operational Risk & Maturity Diagnostic</option>
+                            <option value="loss-intelligence-diagnostic" class="bg-primary text-white">Loss Intelligence Diagnostic</option>
+                            <option value="investigations-diagnostic" class="bg-primary text-white">Investigations Diagnostic</option>
+                            <option value="other" class="bg-primary text-white">General Strategy / Other</option>
+                        </select>
+                    </div>
+                    <div id="other-container" class="space-y-3 hidden">
+                        <label class="block text-silver/70 font-semibold text-sm uppercase tracking-[0.1em]">Please specify</label>
+                        <input type="text" name="other_details" class="w-full bg-white/5 border-b-2 border-accent/20 hover:border-accent/40 focus:border-gold py-4 text-white font-light focus:bg-white/8 transition-all placeholder-silver/40" placeholder="Provide details about your project">
+                    </div>
+                </div>
+
+                <div class="pt-8 flex items-center justify-between">
+                    <div id="status" class="text-xs font-mono text-gold opacity-0 transition-opacity">Submitting...</div>
+                    <button type="submit" class="magnetic-button bg-gold px-12 py-5 rounded-lg text-primary font-bold text-sm tracking-[0.15em] uppercase">Start Conversation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        gsap.from("#mount > *", { opacity: 0, y: 30, duration: 0.8, stagger: 0.2, ease: "power3.out" });
+
+        document.getElementById('intake-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const status = document.getElementById('status');
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            btn.disabled = true;
+            btn.innerText = 'Transmitting...';
+            status.style.opacity = '1';
+
+            try {
+                const res = await fetch('/.netlify/functions/portal-api', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'submit-intake', ...data })
+                });
+                const json = await res.json();
+                if (json.ok) {
+                    btn.innerText = 'Redirecting...';
+                    gsap.to("#mount", { opacity: 0, y: -20, duration: 0.5, onComplete: () => {
+                        const url = new URL('https://calendly.com/brad-bwadvisorysolutions');
+                        if (data.name) {
+                            const nameParts = data.name.trim().split(' ');
+                            url.searchParams.append('first_name', nameParts[0]);
+                            if (nameParts.length > 1) {
+                                url.searchParams.append('last_name', nameParts.slice(1).join(' '));
+                            }
+                        }
+                        if (data.email) url.searchParams.append('email', data.email);
+                        
+                        // Map custom questions based on the form order
+                        if (data.phone) {
+                            // Remove spaces from phone to play nicely with Calendly's native phone input
+                            url.searchParams.append('a1', `${data.country_code}${data.phone.replace(/\\s+/g, '')}`);
+                        }
+                        if (data.organisation) url.searchParams.append('a2', data.organisation);
+                        if (data.role) url.searchParams.append('a3', data.role);
+                        
+                        let prepNotes = '';
+                        if (data.objective) prepNotes += `Objective: ${data.objective}\n`;
+                        if (data.constraint) prepNotes += `Constraint: ${data.constraint}\n`;
+                        if (data.type) {
+                            const focusType = data.type === 'other' && data.other_details ? data.other_details : data.type;
+                            prepNotes += `Focus: ${focusType}`;
+                        }
+                        if (prepNotes) url.searchParams.append('a4', prepNotes);
+
+                        window.location.href = url.toString();
+                    }});
+                } else throw new Error();
+            } catch (err) {
+                alert('Transmission failed. Please check connection and try again.');
+                btn.disabled = false;
+                btn.innerText = 'Start Conversation';
+                status.style.opacity = '0';
+            }
+        };
+    </script>
+</body>
+</html>

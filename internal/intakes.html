@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intake Queue — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Nav ── */
+.nav { background: #0A1C42; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.nav-tag { background: rgba(27,110,194,0.35); color: #7aaee8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-left: 12px; }
+.nav-links { display: flex; align-items: center; gap: 20px; }
+.nav-link { color: #EBF3FA; font-size: 13px; text-decoration: none; opacity: 0.75; }
+.nav-link:hover { opacity: 1; }
+.nav-link.active { opacity: 1; font-weight: 600; }
+.btn-signout { background: none; border: 1px solid rgba(255,255,255,0.2); color: #EBF3FA; font-size: 12px; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+.btn-signout:hover { background: rgba(255,255,255,0.1); }
+
+/* ── Page ── */
+.page { flex: 1; padding: 40px 48px; }
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+.page-title { font-size: 22px; font-weight: 700; color: #0A1C42; }
+.page-sub { font-size: 13px; color: #6a7a8a; margin-top: 4px; }
+.btn-refresh { background: none; border: 1.5px solid #dde4ed; color: #0A1C42; font-size: 13px; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 600; transition: background 0.15s; }
+.btn-refresh:hover { background: #EBF3FA; }
+
+/* ── Research button ── */
+.btn-research {
+  background: none; border: 1.5px solid #1B6EC2; color: #1B6EC2;
+  font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 5px;
+  cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap;
+}
+.btn-research:hover:not(:disabled) { background: #EBF3FA; }
+.btn-research:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-research.done { border-color: #2e7d32; color: #2e7d32; }
+.btn-research.done:hover:not(:disabled) { background: #e8f5e9; }
+
+/* ── Brief panel ── */
+.brief-section { margin-top: 24px; padding-top: 20px; border-top: 1.5px solid #eef0f5; }
+.brief-section-title { font-size: 12px; font-weight: 700; color: #0A1C42; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.brief-section-body  { font-size: 13px; color: #2c2c3e; line-height: 1.7; }
+.brief-questions { padding-left: 18px; margin: 0; }
+.brief-questions li { font-size: 13px; color: #2c2c3e; line-height: 1.7; margin-bottom: 4px; }
+.brief-generating { font-size: 13px; color: #9aaabb; font-style: italic; padding: 16px 0; }
+.brief-error { font-size: 13px; color: #c0392b; padding: 16px 0; }
+.btn-copy-brief {
+  margin-top: 16px; background: #0A1C42; color: #fff; border: none;
+  font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 5px;
+  cursor: pointer; font-family: inherit; transition: background 0.15s;
+}
+.btn-copy-brief:hover { background: #1B6EC2; }
+
+/* ── Table ── */
+.table-wrap { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: #f5f7fa; }
+th { padding: 12px 16px; font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; text-align: left; border-bottom: 1px solid #eef0f5; white-space: nowrap; }
+td { padding: 14px 16px; font-size: 14px; color: #2c2c3e; border-bottom: 1px solid #f0f3f7; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafbfd; }
+.company-name { font-weight: 700; color: #0A1C42; }
+.contact-name { font-size: 13px; color: #555; margin-top: 2px; }
+.contact-email { font-size: 12px; color: #1B6EC2; margin-top: 2px; }
+.call-time { font-size: 13px; color: #0A1C42; font-weight: 600; }
+.reason-text { font-size: 13px; color: #555; line-height: 1.5; max-width: 260px; }
+
+/* ── Badges ── */
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.3px; }
+.badge-pending    { background: #fff7e6; color: #b7620a; }
+.badge-researched { background: #e8f5e9; color: #2e7d32; }
+.badge-called     { background: #e3f2fd; color: #1565c0; }
+.badge-converted  { background: #f3e5f5; color: #6a1b9a; }
+.badge-dismissed  { background: #f5f5f5; color: #999; }
+.badge-calendly   { background: #EBF3FA; color: #1B6EC2; }
+.badge-manual     { background: #f5f5f5; color: #666; }
+
+/* ── Actions ── */
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-action {
+  background: none; border: 1.5px solid #dde4ed; color: #0A1C42;
+  font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 5px;
+  cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap;
+}
+.btn-action:hover { background: #EBF3FA; border-color: #1B6EC2; color: #1B6EC2; }
+.btn-action.danger:hover { background: #fde9e7; border-color: #c0392b; color: #c0392b; }
+.btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Empty / loading ── */
+.state-msg { padding: 56px 24px; text-align: center; color: #9aaabb; font-size: 15px; }
+
+/* ── Detail panel ── */
+.detail-panel {
+  display: none; position: fixed; top: 0; right: 0; bottom: 0;
+  width: 480px; background: #fff; box-shadow: -4px 0 24px rgba(10,28,66,0.12);
+  z-index: 100; flex-direction: column;
+}
+.detail-panel.open { display: flex; }
+.detail-header { background: #0A1C42; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+.detail-header-title { color: #fff; font-size: 16px; font-weight: 700; }
+.btn-close { background: none; border: none; color: #EBF3FA; font-size: 20px; cursor: pointer; padding: 4px; line-height: 1; }
+.detail-body { flex: 1; overflow-y: auto; padding: 24px; }
+.detail-section { margin-bottom: 20px; }
+.detail-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #9aaabb; font-weight: 700; margin-bottom: 6px; }
+.detail-value { font-size: 14px; color: #2c2c3e; line-height: 1.6; }
+
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; }
+  .page { padding: 24px 16px; }
+  .detail-panel { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div style="display:flex;align-items:center;">
+    <a href="/internal/" class="nav-brand">BW Advisory Solutions</a>
+    <span class="nav-tag">Internal</span>
+  </div>
+  <div class="nav-links">
+    <a href="/internal/" class="nav-link">Dashboard</a>
+    <a href="/internal/intakes.html" class="nav-link active">Intakes</a>
+    <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
+    <a href="/internal/clients.html" class="nav-link">Clients</a>
+    <a href="/internal/documents.html" class="nav-link">Documents</a>
+    <a href="/internal/invoices.html" class="nav-link">Invoices</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Intake Queue</div>
+      <div class="page-sub">Prospects who have requested a discovery call.</div>
+    </div>
+    <button class="btn-refresh" onclick="loadIntakes()">&#8635; Refresh</button>
+  </div>
+
+  <div class="table-wrap">
+    <table id="intakes-table">
+      <thead>
+        <tr>
+          <th>Organisation</th>
+          <th>Call time</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Source</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="intakes-body">
+        <tr><td colspan="6" class="state-msg">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Detail panel -->
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-header-title" id="detail-title">Intake Detail</div>
+    <button class="btn-close" onclick="closeDetail()">&#10005;</button>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+
+function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
+function signOut() { sessionStorage.removeItem('brad_api_key'); location.href = '/internal/'; }
+
+// Auth guard
+if (!getKey()) location.href = '/internal/';
+
+const statusLabel = {
+  pending:    '<span class="badge badge-pending">Pending</span>',
+  researched: '<span class="badge badge-researched">Researched</span>',
+  called:     '<span class="badge badge-called">Called</span>',
+  converted:  '<span class="badge badge-converted">Converted</span>',
+  dismissed:  '<span class="badge badge-dismissed">Dismissed</span>',
+};
+
+const sourceLabel = {
+  manual:   '<span class="badge badge-manual">Manual</span>',
+  calendly: '<span class="badge badge-calendly">Calendly</span>',
+};
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleString('en-AU', {
+      timeZone: 'Australia/Perth', day: 'numeric', month: 'short',
+      year: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+  } catch { return iso; }
+}
+
+function fmtCallTime(raw) {
+  if (!raw) return '—';
+  try {
+    // datetime-local gives "2026-04-25T10:00" — format nicely
+    const d = new Date(raw);
+    return d.toLocaleString('en-AU', {
+      timeZone: 'Australia/Perth', weekday: 'short', day: 'numeric',
+      month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    }) + ' AWST';
+  } catch { return raw; }
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let intakesData = [];
+
+async function loadIntakes() {
+  document.getElementById('intakes-body').innerHTML = '<tr><td colspan="6" class="state-msg">Loading…</td></tr>';
+  try {
+    const res = await fetch(`${API}?action=get-intakes`, {
+      headers: { 'x-portal-api-key': getKey() }
+    });
+    if (res.status === 401) { signOut(); return; }
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    intakesData = json.intakes;
+    renderIntakes(intakesData);
+  } catch (e) {
+    document.getElementById('intakes-body').innerHTML = `<tr><td colspan="6" class="state-msg">Failed to load: ${esc(e.message)}</td></tr>`;
+  }
+}
+
+function renderIntakes(intakes) {
+  const tbody = document.getElementById('intakes-body');
+  if (!intakes.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="state-msg">No intakes yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = intakes.map(i => `
+    <tr>
+      <td>
+        <div class="company-name">${esc(i.company)}</div>
+        <div class="contact-name">${esc(i.contact_name)}</div>
+        <div class="contact-email">${esc(i.contact_email)}</div>
+      </td>
+      <td><div class="call-time">${fmtCallTime(i.call_datetime)}</div></td>
+      <td><div class="reason-text">${esc(i.reason)}</div></td>
+      <td>${statusLabel[i.status] || esc(i.status)}</td>
+      <td>${sourceLabel[i.source] || esc(i.source)}</td>
+      <td>
+        <div class="actions">
+          <button class="btn-action" onclick="showDetail('${esc(i.id)}')">View</button>
+          ${i.status !== 'dismissed'
+            ? `<button class="btn-research ${i.status === 'researched' ? 'done' : ''}"
+                 id="btn-research-${esc(i.id)}"
+                 onclick="runResearch('${esc(i.id)}')">${i.status === 'researched' ? '&#10003; Re-run' : '&#9889; Research'}</button>
+               <button class="btn-action danger" onclick="dismiss('${esc(i.id)}', this)">Dismiss</button>`
+            : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function dismiss(id, btn) {
+  if (!confirm('Mark this intake as dismissed?')) return;
+  btn.disabled = true;
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'update-intake-status', id, status: 'dismissed' }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    await loadIntakes();
+  } catch (e) {
+    alert('Failed: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+function showDetail(id) {
+  const i = intakesData.find(x => x.id === id);
+  if (!i) return;
+
+  document.getElementById('detail-title').textContent = i.company;
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-label">Contact</div>
+      <div class="detail-value"><strong>${esc(i.contact_name)}</strong><br>${esc(i.contact_email)}</div>
+    </div>
+    ${i.industry ? `<div class="detail-section"><div class="detail-label">Industry</div><div class="detail-value">${esc(i.industry)}</div></div>` : ''}
+    ${i.url ? `<div class="detail-section"><div class="detail-label">Website</div><div class="detail-value"><a href="${esc(i.url)}" target="_blank" style="color:#1B6EC2;">${esc(i.url)}</a></div></div>` : ''}
+    <div class="detail-section">
+      <div class="detail-label">What they'd like to discuss</div>
+      <div class="detail-value">${esc(i.reason)}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">Status</div>
+      <div class="detail-value">${statusLabel[i.status] || esc(i.status)}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">Submitted</div>
+      <div class="detail-value">${fmtDate(i.createdAt)}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label">Intake ID</div>
+      <div class="detail-value" style="font-size:12px;color:#9aaabb;">${esc(i.id)}</div>
+    </div>
+    <div id="brief-container"></div>
+  `;
+  document.getElementById('detail-panel').classList.add('open');
+
+  // Load existing brief if available
+  loadBriefIntoPanel(i.id, i);
+}
+
+async function loadBriefIntoPanel(intakeId, intake) {
+  const container = document.getElementById('brief-container');
+  if (!container) return;
+  try {
+    const res  = await fetch(`${API}?action=get-research-brief&intakeId=${encodeURIComponent(intakeId)}`,
+      { headers: { 'x-portal-api-key': getKey() } });
+    const json = await res.json();
+    if (json.status === 'complete' && json.brief) {
+      renderBriefInPanel(json.brief, intake);
+    } else if (json.status === 'generating') {
+      container.innerHTML = `<div class="brief-section"><p class="brief-generating">Research brief generating…</p></div>`;
+      pollResearch(intakeId, 0, intake);
+    }
+    // status 'none' or 'error' — show nothing / leave for Research button
+  } catch { /* silently ignore */ }
+}
+
+async function runResearch(intakeId) {
+  const btn = document.getElementById(`btn-research-${intakeId}`);
+  if (btn) { btn.disabled = true; btn.innerHTML = 'Starting…'; }
+
+  try {
+    const res = await fetch('/.netlify/functions/research-intake-background', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body:    JSON.stringify({ intakeId }),
+    });
+    // 202 = accepted, background running; 200 also acceptable
+    if (!res.ok && res.status !== 202) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || 'Failed to start research');
+    }
+    if (btn) btn.innerHTML = 'Generating…';
+
+    // If detail panel is open for this intake, show generating state
+    const container = document.getElementById('brief-container');
+    if (container) {
+      container.innerHTML = `<div class="brief-section"><p class="brief-generating">Research brief generating…</p></div>`;
+    }
+
+    const intake = intakesData.find(x => x.id === intakeId);
+    pollResearch(intakeId, 0, intake);
+  } catch (e) {
+    alert('Failed to start research: ' + e.message);
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#9889; Research'; }
+  }
+}
+
+async function pollResearch(intakeId, attempts, intake) {
+  if (attempts > 72) return; // 6-min safety cap at 5s intervals
+
+  await new Promise(r => setTimeout(r, 5000));
+
+  let json;
+  try {
+    const res = await fetch(`${API}?action=get-research-brief&intakeId=${encodeURIComponent(intakeId)}`,
+      { headers: { 'x-portal-api-key': getKey() } });
+    json = await res.json();
+  } catch { pollResearch(intakeId, attempts + 1, intake); return; }
+
+  if (json.status === 'complete' && json.brief) {
+    renderBriefInPanel(json.brief, intake);
+    await loadIntakes(); // refresh table — badge flips to Researched
+    return;
+  }
+  if (json.status === 'error') {
+    const container = document.getElementById('brief-container');
+    if (container) container.innerHTML = `<div class="brief-section"><p class="brief-error">Research failed: ${esc(json.error || 'Unknown error')}</p></div>`;
+    const btn = document.getElementById(`btn-research-${intakeId}`);
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#9889; Research'; }
+    return;
+  }
+  // still generating
+  pollResearch(intakeId, attempts + 1, intake);
+}
+
+function renderBriefInPanel(brief, intake) {
+  const container = document.getElementById('brief-container');
+  if (!container) return;
+
+  const section = (title, body) => body
+    ? `<div class="brief-section">
+         <div class="brief-section-title">${esc(title)}</div>
+         <div class="brief-section-body">${esc(body)}</div>
+       </div>`
+    : '';
+
+  const questions = Array.isArray(brief.opening_questions) && brief.opening_questions.length
+    ? `<div class="brief-section">
+         <div class="brief-section-title">Opening Questions</div>
+         <ul class="brief-questions">${brief.opening_questions.map(q => `<li>${esc(q)}</li>`).join('')}</ul>
+       </div>`
+    : '';
+
+  container.innerHTML = `
+    <div class="brief-section" style="border-top:1.5px solid #eef0f5;padding-top:20px;margin-top:24px;">
+      <div style="font-size:15px;font-weight:700;color:#0A1C42;margin-bottom:16px;">Pre-Call Research Brief</div>
+    </div>
+    ${section('Organisation Overview',    brief.org_overview)}
+    ${section('Contact Intelligence',     brief.contact_intel)}
+    ${section('Recent Developments',      brief.recent_dev)}
+    ${section('Strategic Context',        brief.strategic_context)}
+    ${section('Alignment to BW Advisory', brief.bw_alignment)}
+    ${questions}
+    ${section('Flags & Gaps',             brief.flags_gaps)}
+    <button class="btn-copy-brief" onclick="copyBriefAsMarkdown(${JSON.stringify(brief).replace(/</g,'\\u003c')}, ${JSON.stringify(intake || {}).replace(/</g,'\\u003c')})">Copy as Markdown</button>
+  `;
+
+  // Update research button state
+  if (intake?.id) {
+    const btn = document.getElementById(`btn-research-${intake.id}`);
+    if (btn) { btn.disabled = false; btn.className = 'btn-research done'; btn.innerHTML = '&#10003; Re-run'; }
+  }
+}
+
+function copyBriefAsMarkdown(brief, intake) {
+  const company = intake?.company || 'Unknown';
+  const contact = intake?.contact_name || '';
+  const email   = intake?.contact_email || '';
+  const today   = new Date().toISOString().split('T')[0];
+
+  const questions = Array.isArray(brief.opening_questions)
+    ? brief.opening_questions.map(q => `- ${q}`).join('\n')
+    : '';
+
+  const md = `---
+client: ${company}
+contact: ${contact}
+type: meeting-prep
+work_type: internal
+status: draft
+date_created: ${today}
+---
+
+up:: [[000 Dashboard]]
+
+# Pre-Call Brief — ${company}
+
+**Date:** ${today}
+**Contact:** ${contact}${email ? ` (${email})` : ''}
+
+---
+
+## Organisation Overview
+
+${brief.org_overview || ''}
+
+## Contact Intelligence
+
+${brief.contact_intel || ''}
+
+## Recent Developments
+
+${brief.recent_dev || ''}
+
+## Strategic Context
+
+${brief.strategic_context || ''}
+
+## Alignment to BW Advisory
+
+${brief.bw_alignment || ''}
+
+## Opening Questions
+
+${questions}
+
+## Flags & Gaps
+
+${brief.flags_gaps || ''}
+`;
+
+  navigator.clipboard.writeText(md).then(() => {
+    const btn = document.querySelector('.btn-copy-brief');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy as Markdown'; }, 2000); }
+  }).catch(() => alert('Clipboard copy failed. Try again or copy manually.'));
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+}
+
+loadIntakes();
+</script>
+</body>
+</html>

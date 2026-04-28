@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoices — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; }
+.nav { background: #0A1C42; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.nav-tag { background: rgba(27,110,194,0.35); color: #7aaee8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-left: 12px; }
+.nav-links { display: flex; align-items: center; gap: 16px; }
+.nav-link { color: #EBF3FA; font-size: 13px; text-decoration: none; opacity: 0.75; white-space: nowrap; }
+.nav-link:hover, .nav-link.active { opacity: 1; font-weight: 600; }
+.btn-signout { background: none; border: 1px solid rgba(255,255,255,0.2); color: #EBF3FA; font-size: 12px; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+.btn-signout:hover { background: rgba(255,255,255,0.1); }
+.page { flex: 1; padding: 40px 48px; max-width: 1200px; }
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+.page-title { font-size: 22px; font-weight: 700; color: #0A1C42; }
+.page-sub { font-size: 13px; color: #6a7a8a; margin-top: 4px; }
+.btn-primary { background: #1B6EC2; color: #fff; border: none; border-radius: 7px; padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+.btn-primary:hover { background: #155fa8; }
+.btn-primary:disabled { opacity: 0.55; cursor: default; }
+
+/* Add invoice form */
+.add-form { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; padding: 24px 28px; margin-bottom: 28px; display: none; }
+.add-form.open { display: block; }
+.form-title { font-size: 15px; font-weight: 700; color: #0A1C42; margin-bottom: 18px; }
+.form-section { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 12px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 6px; }
+.field input, .field select, .field textarea { width: 100%; padding: 10px 13px; border: 1.5px solid #dde4ed; border-radius: 6px; font-size: 14px; font-family: inherit; color: #1a1a2e; background: #fafbfc; }
+.field textarea { resize: vertical; min-height: 72px; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #1B6EC2; background: #fff; box-shadow: 0 0 0 3px rgba(27,110,194,0.08); }
+.field.has-error input, .field.has-error select { border-color: #c0392b; }
+.field-err { font-size: 12px; color: #c0392b; margin-top: 4px; display: none; }
+.field.has-error .field-err { display: block; }
+
+/* Line items */
+.items-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+.items-table th { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; text-align: left; padding: 6px 8px; border-bottom: 1px solid #eef0f5; }
+.items-table td { padding: 6px 4px; vertical-align: top; }
+.items-table td input { padding: 8px 10px; border: 1.5px solid #dde4ed; border-radius: 5px; font-size: 13px; font-family: inherit; background: #fafbfc; width: 100%; }
+.items-table td input:focus { outline: none; border-color: #1B6EC2; background: #fff; }
+.col-qty  { width: 70px; }
+.col-price{ width: 110px; }
+.col-name { width: 200px; }
+.col-desc { }
+.col-del  { width: 36px; }
+.btn-del-row { background: none; border: none; color: #c0392b; font-size: 16px; cursor: pointer; padding: 4px 6px; line-height: 1; border-radius: 4px; }
+.btn-del-row:hover { background: #fdecea; }
+.btn-add-line { background: none; border: 1.5px dashed #c0cbd8; color: #666; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: inherit; margin-top: 4px; }
+.btn-add-line:hover { border-color: #1B6EC2; color: #1B6EC2; }
+
+/* Totals */
+.totals-wrap { display: flex; justify-content: flex-end; margin-top: 16px; }
+.totals-box { width: 280px; border: 1px solid #eef0f5; border-radius: 8px; overflow: hidden; }
+.totals-row { display: flex; justify-content: space-between; padding: 9px 14px; font-size: 14px; border-bottom: 1px solid #f0f3f7; }
+.totals-row:last-child { border-bottom: none; font-weight: 700; background: #f5f7fa; font-size: 15px; }
+.totals-label { color: #666; }
+.totals-val { color: #0A1C42; }
+
+/* GST row */
+.gst-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.gst-row label { font-size: 13px; font-weight: 600; color: #0A1C42; }
+.gst-row select { padding: 8px 11px; border: 1.5px solid #dde4ed; border-radius: 6px; font-size: 13px; font-family: inherit; background: #fafbfc; }
+
+.form-actions { display: flex; gap: 10px; margin-top: 22px; }
+.btn-cancel { background: none; border: 1.5px solid #dde4ed; color: #666; border-radius: 7px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-cancel:hover { background: #f5f7fa; }
+
+/* Invoice table */
+.table-wrap { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: #f5f7fa; }
+th { padding: 11px 16px; font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; text-align: left; border-bottom: 1px solid #eef0f5; }
+td { padding: 13px 16px; font-size: 14px; color: #2c2c3e; border-bottom: 1px solid #f0f3f7; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafbfd; }
+.inv-num { font-weight: 700; color: #0A1C42; font-family: monospace; font-size: 13px; }
+.inv-client { font-size: 13px; color: #666; margin-top: 2px; }
+.badge-unpaid { background: #fff3e0; color: #e65100; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.badge-paid   { background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.amount-col { font-weight: 700; color: #0A1C42; text-align: right; }
+.action-btn { background: none; border: 1.5px solid #dde4ed; color: #1B6EC2; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.action-btn:hover { border-color: #1B6EC2; background: #f0f6fe; }
+.state-msg { padding: 56px 24px; text-align: center; color: #9aaabb; font-size: 15px; }
+
+/* Mark paid modal */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(10,28,66,0.35); z-index: 100; align-items: center; justify-content: center; }
+.modal-backdrop.open { display: flex; }
+.modal { background: #fff; border-radius: 12px; padding: 28px 32px; width: 400px; max-width: 95vw; box-shadow: 0 8px 40px rgba(10,28,66,0.18); }
+.modal-title { font-size: 16px; font-weight: 700; color: #0A1C42; margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+@media (max-width: 900px) {
+  .form-grid-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; } .page { padding: 24px 16px; }
+  .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+  .items-table .col-desc { display: none; }
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div style="display:flex;align-items:center;">
+    <a href="/internal/" class="nav-brand">BW Advisory Solutions</a>
+    <span class="nav-tag">Internal</span>
+  </div>
+  <div class="nav-links">
+    <a href="/internal/" class="nav-link">Dashboard</a>
+    <a href="/internal/intakes.html" class="nav-link">Intakes</a>
+    <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
+    <a href="/internal/clients.html" class="nav-link">Clients</a>
+    <a href="/internal/documents.html" class="nav-link">Documents</a>
+    <a href="/internal/invoices.html" class="nav-link active">Invoices</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Invoices</div>
+      <div class="page-sub">Create and track invoices for client engagements.</div>
+    </div>
+    <button class="btn-primary" onclick="toggleForm()">+ New Invoice</button>
+  </div>
+
+  <!-- New invoice form -->
+  <div class="add-form" id="add-form">
+    <div class="form-title">New Invoice</div>
+
+    <div class="form-section">Client</div>
+    <div class="form-grid">
+      <div class="field" id="f-client">
+        <label>Client *</label>
+        <select id="inv-client">
+          <option value="">Select client…</option>
+        </select>
+        <div class="field-err">Client is required.</div>
+      </div>
+      <div class="field">
+        <label>Client address</label>
+        <input type="text" id="inv-addr" placeholder="e.g. 123 Main St, Wellington, NZ">
+      </div>
+    </div>
+
+    <div class="form-section">Dates</div>
+    <div class="form-grid">
+      <div class="field" id="f-date">
+        <label>Invoice date *</label>
+        <input type="date" id="inv-date">
+        <div class="field-err">Invoice date is required.</div>
+      </div>
+      <div class="field" id="f-due">
+        <label>Due date *</label>
+        <input type="date" id="inv-due">
+        <div class="field-err">Due date is required.</div>
+      </div>
+    </div>
+
+    <div class="form-section">Line Items</div>
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th class="col-qty">Qty</th>
+          <th class="col-price">Unit price</th>
+          <th class="col-name">Item</th>
+          <th class="col-desc">Description</th>
+          <th class="col-del"></th>
+        </tr>
+      </thead>
+      <tbody id="items-body">
+      </tbody>
+    </table>
+    <button class="btn-add-line" onclick="addLineItem()">+ Add line item</button>
+
+    <div class="gst-row">
+      <label for="inv-gst">GST rate:</label>
+      <select id="inv-gst" onchange="recalc()">
+        <option value="0.10" selected>10% (standard)</option>
+        <option value="0.15">15% (NZ)</option>
+        <option value="0">0% (GST-free)</option>
+      </select>
+    </div>
+
+    <div class="totals-wrap" id="totals-wrap">
+      <div class="totals-box">
+        <div class="totals-row"><span class="totals-label">Subtotal</span><span class="totals-val" id="t-sub">$0.00</span></div>
+        <div class="totals-row"><span class="totals-label" id="t-gst-label">GST (10%)</span><span class="totals-val" id="t-gst">$0.00</span></div>
+        <div class="totals-row"><span class="totals-label">Total</span><span class="totals-val" id="t-total">$0.00</span></div>
+      </div>
+    </div>
+
+    <div class="form-section">Payment &amp; Notes</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Payment options</label>
+        <select id="inv-paymode">
+          <option value="both">AUD bank + Wise (NZD)</option>
+          <option value="aud">AUD bank transfer only</option>
+          <option value="nzd">Wise (NZD) only</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notes <span style="font-weight:400;color:#888">(optional)</span></label>
+        <input type="text" id="inv-notes" placeholder="e.g. Stage 2 of 3 — Discovery &amp; Gap Analysis">
+      </div>
+    </div>
+    <div style="font-size:12px;color:#888;margin-top:8px;">Payment details (bank, Wise) are loaded from the Finance Hub profile automatically.</div>
+
+    <div class="form-actions">
+      <button class="btn-primary" id="btn-save-inv" onclick="saveInvoice()">Create Invoice</button>
+      <button class="btn-cancel" onclick="toggleForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Invoice table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Invoice</th>
+          <th>Client</th>
+          <th>Date</th>
+          <th>Due</th>
+          <th style="text-align:right">Total</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="invoices-body">
+        <tr><td colspan="7" class="state-msg">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Mark paid modal -->
+<div class="modal-backdrop" id="modal-paid">
+  <div class="modal">
+    <div class="modal-title">Mark Invoice Paid</div>
+    <div class="field">
+      <label>Payment method</label>
+      <select id="paid-method">
+        <option value="">Select…</option>
+        <option>Bank transfer</option>
+        <option>Wise</option>
+        <option>Credit card</option>
+        <option>Cash</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label>Date paid</label>
+      <input type="date" id="paid-date">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="btn-confirm-paid" onclick="confirmPaid()">Mark Paid</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
+function signOut() { sessionStorage.removeItem('brad_api_key'); location.href = '/internal/'; }
+if (!getKey()) location.href = '/internal/';
+
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(iso) { try { return new Date(iso).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); } catch { return iso||'—'; } }
+function fmtDate(d) { if (!d) return '—'; const [y,m,dy] = d.split('-'); return `${parseInt(dy,10)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m,10)-1]} ${y}`; }
+function fmtMoney(n) { return '$' + (Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+
+let formOpen = false;
+let clients  = [];
+let pendingPaidId = null;
+let itemCount = 0;
+
+// ── Clients ───────────────────────────────────────────────────────────────────
+
+async function loadClientOptions() {
+  try {
+    const res  = await fetch(`${API}?action=get-clients`, { headers: { 'x-portal-api-key': getKey() } });
+    const json = await res.json();
+    if (!json.ok) return;
+    clients = json.clients;
+    const sel = document.getElementById('inv-client');
+    clients.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value       = c.id;
+      opt.textContent = c.name + (c.organisation ? ` — ${c.organisation}` : '');
+      opt.dataset.email = c.email;
+      opt.dataset.name  = c.name;
+      sel.appendChild(opt);
+    });
+  } catch {}
+}
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+
+function toggleForm() {
+  formOpen = !formOpen;
+  document.getElementById('add-form').classList.toggle('open', formOpen);
+  if (formOpen && document.getElementById('items-body').children.length === 0) {
+    addLineItem();
+    setDefaultDates();
+  }
+}
+
+function setDefaultDates() {
+  const today = new Date();
+  const pad   = n => String(n).padStart(2,'0');
+  const todayStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  const due30    = new Date(today); due30.setDate(today.getDate() + 30);
+  const dueStr   = `${due30.getFullYear()}-${pad(due30.getMonth()+1)}-${pad(due30.getDate())}`;
+  document.getElementById('inv-date').value = todayStr;
+  document.getElementById('inv-due').value  = dueStr;
+}
+
+function addLineItem() {
+  itemCount++;
+  const id = `item-${itemCount}`;
+  const row = document.createElement('tr');
+  row.id = id;
+  row.innerHTML = `
+    <td class="col-qty"><input type="number" min="0.01" step="0.01" value="1" class="item-qty" oninput="recalc()"></td>
+    <td class="col-price"><input type="number" min="0" step="0.01" value="" placeholder="0.00" class="item-price" oninput="recalc()"></td>
+    <td class="col-name"><input type="text" placeholder="Service or product name" class="item-name"></td>
+    <td class="col-desc"><input type="text" placeholder="Brief description" class="item-desc"></td>
+    <td class="col-del"><button class="btn-del-row" onclick="delRow('${id}')" title="Remove">×</button></td>
+  `;
+  document.getElementById('items-body').appendChild(row);
+  row.querySelector('.item-price').focus();
+}
+
+function delRow(id) {
+  const el = document.getElementById(id);
+  if (el) { el.remove(); recalc(); }
+}
+
+function recalc() {
+  const gstRate  = parseFloat(document.getElementById('inv-gst').value) || 0;
+  let sub = 0;
+  document.querySelectorAll('#items-body tr').forEach(row => {
+    const qty   = parseFloat(row.querySelector('.item-qty')?.value)   || 0;
+    const price = parseFloat(row.querySelector('.item-price')?.value) || 0;
+    sub += qty * price;
+  });
+  const gstAmt = Math.round(sub * gstRate * 100) / 100;
+  const total  = Math.round((sub + gstAmt) * 100) / 100;
+
+  document.getElementById('t-sub').textContent   = fmtMoney(sub);
+  document.getElementById('t-gst').textContent   = fmtMoney(gstAmt);
+  document.getElementById('t-total').textContent = fmtMoney(total);
+  const pct = Math.round(gstRate * 100);
+  document.getElementById('t-gst-label').textContent = pct ? `GST (${pct}%)` : 'GST (0%)';
+}
+
+function getItems() {
+  return Array.from(document.querySelectorAll('#items-body tr')).map(row => ({
+    qty:   parseFloat(row.querySelector('.item-qty')?.value)   || 0,
+    price: parseFloat(row.querySelector('.item-price')?.value) || 0,
+    name:  row.querySelector('.item-name')?.value.trim()       || '',
+    desc:  row.querySelector('.item-desc')?.value.trim()       || '',
+  }));
+}
+
+async function saveInvoice() {
+  const clientSel = document.getElementById('inv-client');
+  const clientId  = clientSel.value;
+  const invDate   = document.getElementById('inv-date').value;
+  const invDue    = document.getElementById('inv-due').value;
+
+  // Validate
+  document.getElementById('f-client').classList.toggle('has-error', !clientId);
+  document.getElementById('f-date').classList.toggle('has-error', !invDate);
+  document.getElementById('f-due').classList.toggle('has-error', !invDue);
+  if (!clientId || !invDate || !invDue) return;
+
+  const items = getItems().filter(i => i.price > 0 || i.name);
+  if (!items.length) { alert('Add at least one line item.'); return; }
+
+  const selOpt      = clientSel.options[clientSel.selectedIndex];
+  const clientName  = selOpt.dataset.name  || clientSel.options[clientSel.selectedIndex].textContent;
+  const clientEmail = selOpt.dataset.email || '';
+  const clientAddr  = document.getElementById('inv-addr').value.trim();
+  const gstRate     = parseFloat(document.getElementById('inv-gst').value) || 0;
+  const paymentMode = document.getElementById('inv-paymode').value;
+  const notes       = document.getElementById('inv-notes').value.trim();
+
+  const btn = document.getElementById('btn-save-inv');
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({
+        action: 'add-invoice',
+        clientId,
+        clientName,
+        clientEmail,
+        clientAddr,
+        items,
+        gstRate,
+        date: invDate,
+        due:  invDue,
+        paymentMode,
+        notes,
+      }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+
+    // Reset form
+    document.getElementById('items-body').innerHTML = '';
+    document.getElementById('inv-client').value  = '';
+    document.getElementById('inv-addr').value    = '';
+    document.getElementById('inv-date').value    = '';
+    document.getElementById('inv-due').value     = '';
+    document.getElementById('inv-notes').value   = '';
+    document.getElementById('inv-paymode').value = 'both';
+    document.getElementById('inv-gst').value     = '0.10';
+    recalc();
+    toggleForm();
+    await loadInvoices();
+  } catch (e) { alert('Failed: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Create Invoice'; }
+}
+
+// ── Invoice list ──────────────────────────────────────────────────────────────
+
+async function loadInvoices() {
+  const tbody = document.getElementById('invoices-body');
+  tbody.innerHTML = '<tr><td colspan="7" class="state-msg">Loading…</td></tr>';
+  try {
+    const res  = await fetch(`${API}?action=get-invoices`, { headers: { 'x-portal-api-key': getKey() } });
+    if (res.status === 401) { signOut(); return; }
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    if (!json.invoices.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="state-msg">No invoices yet. Create one above.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = json.invoices.map(inv => `
+      <tr>
+        <td>
+          <div class="inv-num">${esc(inv.num)}</div>
+        </td>
+        <td>
+          <div>${esc(inv.client)}</div>
+          ${inv.clientEmail ? `<div class="inv-client">${esc(inv.clientEmail)}</div>` : ''}
+        </td>
+        <td>${fmtDate(inv.date)}</td>
+        <td>${fmtDate(inv.due)}</td>
+        <td class="amount-col">${fmtMoney(inv.total)}</td>
+        <td>
+          ${inv.status === 'paid'
+            ? `<span class="badge-paid">Paid</span>${inv.paidDate ? `<div style="font-size:11px;color:#888;margin-top:3px">${fmtDate(inv.paidDate)}</div>` : ''}`
+            : `<span class="badge-unpaid">Due</span>`}
+        </td>
+        <td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <a href="https://bwadvisoryhub.netlify.app/invoice.html?num=${esc(inv.num)}" target="_blank" class="action-btn">View</a>
+          ${inv.status !== 'paid'
+            ? `<button class="action-btn" onclick="openMarkPaid('${esc(inv.num)}')">Mark paid</button>`
+            : `<span style="font-size:12px;color:#aaa">${inv.paymentMode ? esc(inv.paymentMode) : ''}</span>`}
+        </td>
+      </tr>`).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="7" class="state-msg">Failed to load: ${esc(e.message)}</td></tr>`;
+  }
+}
+
+// ── Mark paid modal ───────────────────────────────────────────────────────────
+
+function openMarkPaid(id) {
+  pendingPaidId = id;
+  const today = new Date();
+  const pad   = n => String(n).padStart(2,'0');
+  document.getElementById('paid-date').value   = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  document.getElementById('paid-method').value = '';
+  document.getElementById('modal-paid').classList.add('open');
+}
+
+function closeModal() {
+  pendingPaidId = null;
+  document.getElementById('modal-paid').classList.remove('open');
+}
+
+async function confirmPaid() {
+  if (!pendingPaidId) return;
+  const paymentMode = document.getElementById('paid-method').value;
+  const paidAt      = document.getElementById('paid-date').value
+    ? new Date(document.getElementById('paid-date').value).toISOString()
+    : new Date().toISOString();
+
+  const btn = document.getElementById('btn-confirm-paid');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'mark-invoice-paid', num: pendingPaidId, paymentMode, paidAt }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    closeModal();
+    await loadInvoices();
+  } catch (e) { alert('Failed: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Mark Paid'; }
+}
+
+// Close modal on backdrop click
+document.getElementById('modal-paid').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+loadClientOptions();
+loadInvoices();
+</script>
+</body>
+</html>

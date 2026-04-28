@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - BW Advisory Solutions</title>
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --surface-color: #1a1d24;
+            --text-main: #f0f2f5;
+            --text-muted: #9ba3af;
+            --accent-gold: #c5a880;
+            --accent-gold-dim: rgba(197, 168, 128, 0.15);
+            --border-color: #2d333b;
+            --success: #3fb950;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 30px;
+            margin-bottom: 30px;
+        }
+
+        .brand-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-meta h1 {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
+        .invoice-meta p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .billing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .billing-section h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .billing-details {
+            font-size: 15px;
+        }
+
+        .table-container {
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .item-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .item-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .amount-col {
+            text-align: right;
+        }
+
+        .totals-section {
+            width: 350px;
+            margin-left: auto;
+            margin-bottom: 40px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .total-row.strong {
+            color: var(--text-main);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 5px;
+            padding-top: 15px;
+        }
+
+        .total-row.grand-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            padding-top: 20px;
+            border-top: none;
+        }
+
+        .payment-options {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        .payment-options h3 {
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .option-box {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .option-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            background-color: var(--accent-gold-dim);
+            color: var(--accent-gold);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .bank-details {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .bank-detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            padding: 12px;
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        .btn-gold {
+            background-color: var(--accent-gold);
+            color: var(--bg-color);
+            border: none;
+        }
+
+        .btn-gold:hover {
+            opacity: 0.9;
+        }
+
+        .btn:hover {
+            background-color: var(--border-color);
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="brand-logo">
+                BW Advisory
+            </div>
+            <div class="invoice-meta">
+                <h1>INVOICE</h1>
+                <p>Invoice #: INV-BW-2026-042</p>
+                <p>Date: April 16, 2026</p>
+                <p>Due Date: April 30, 2026</p>
+            </div>
+        </div>
+
+        <!-- Billing Entity Details -->
+        <div class="billing-grid">
+            <div class="billing-section">
+                <h3>Billed To</h3>
+                <div class="billing-details">
+                    <strong>Acme Corp New Zealand</strong><br>
+                    123 Kiwi Blvd, Auckland, NZ<br>
+                    finance@acmecorp.co.nz
+                </div>
+            </div>
+            <div class="billing-section">
+                <h3>From</h3>
+                <div class="billing-details">
+                    <strong>BW Advisory Solutions</strong><br>
+                    hello@bwadvisory.com<br>
+                    www.bwadvisory.com
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Rendered Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="amount-col">Amount (AUD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+        <tr>
+            <td>
+                <div class="item-name">Tier-1 Gap Analysis Session</div>
+                <div class="item-desc">Executive cybersecurity gap analysis workshop.</div>
+            </td>
+            <td class="amount-col">$1500.00</td>
+        </tr>
+        
+        <tr>
+            <td>
+                <div class="item-name">Strategic Architecture Review</div>
+                <div class="item-desc">Review of the proposed cloud architecture.</div>
+            </td>
+            <td class="amount-col">$800.00</td>
+        </tr>
+        
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals & Conversions -->
+        <div class="totals-section">
+            <div class="total-row">
+                <span>Subtotal (AUD)</span>
+                <span>$2,300.00</span>
+            </div>
+            <div class="total-row strong">
+                <span>Total Valid in AUD</span>
+                <span>$2,300.00</span>
+            </div>
+            
+            <div style="margin-top:20px; font-size:12px; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.5px;">Currency Conversion</div>
+            
+            <div class="total-row">
+                <span>Locked Exchange Rate</span>
+                <span>1 AUD = 1.2100 NZD</span>
+            </div>
+            <div class="total-row">
+                <span>Converted Subtotal (NZD)</span>
+                <span>$2,783.00</span>
+            </div>
+            <div class="total-row">
+                <span>FX Processing Surcharge (1.50%)</span>
+                <span>$41.74</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>Total Due</span>
+                <span>$2,824.74 NZD</span>
+            </div>
+        </div>
+
+        <!-- Payment Options -->
+        <div class="payment-options">
+            <h3>Payment Methods</h3>
+            
+            <!-- Option 1: Wise Bank Transfer -->
+            <div class="option-box">
+                <div class="option-header">
+                    <div class="option-title">Bank Transfer <span class="badge">Preferred</span></div>
+                    <div><strong>$2,824.74 NZD</strong></div>
+                </div>
+                <div style="font-size:13px; color:var(--text-muted);">Zero payment processing fees. Settlement via Wise.</div>
+                
+                <div class="bank-details">
+                    <div class="bank-detail-item">
+                        <span>Bank Name:</span>
+                        <span>Wise NZ</span>
+                    </div>
+                    <div class="bank-detail-item">
+                        <span>Account Name:</span>
+                        <span>BW Advisory Solutions</span>
+                    </div>
+                    <div class="bank-detail-item">
+                        <span>Account Number:</span>
+                        <span>01-1234-0000000-00</span>
+                    </div>
+                    <!-- Routing details can go here based on currency -->
+                    <div class="bank-detail-item" style="color:var(--text-main); margin-top:8px;">
+                        <span>Reference:</span>
+                        <span style="font-weight:600;">INV-BW-2026-042</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option 2: Credit Card (Stripe) -->
+            
+        <div class="option-box">
+            <div class="option-header">
+                <div class="option-title">Credit Card</div>
+                <div><strong>$2,909.42 NZD</strong></div>
+            </div>
+            <div style="font-size:13px; color:var(--text-muted);">Includes Stripe Processing Fee (2.9% + $0.30).</div>
+            <a href="https://buy.stripe.com/test_dummy_link_for_demo" class="btn btn-gold">Pay by Credit Card</a>
+        </div>
+        
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Payment is due within 14 days. Late payments may be subject to additional fees.<br>
+            Thank you for partnering with BW Advisory Solutions.
+        </div>
+    </div>
+
+</body>
+</html>

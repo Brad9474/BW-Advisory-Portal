@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clients — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; }
+.nav { background: #0A1C42; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.nav-tag { background: rgba(27,110,194,0.35); color: #7aaee8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-left: 12px; }
+.nav-links { display: flex; align-items: center; gap: 16px; }
+.nav-link { color: #EBF3FA; font-size: 13px; text-decoration: none; opacity: 0.75; white-space: nowrap; }
+.nav-link:hover, .nav-link.active { opacity: 1; font-weight: 600; }
+.btn-signout { background: none; border: 1px solid rgba(255,255,255,0.2); color: #EBF3FA; font-size: 12px; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+.btn-signout:hover { background: rgba(255,255,255,0.1); }
+.page { flex: 1; padding: 40px 48px; max-width: 1100px; }
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+.page-title { font-size: 22px; font-weight: 700; color: #0A1C42; }
+.page-sub { font-size: 13px; color: #6a7a8a; margin-top: 4px; }
+.btn-primary { background: #1B6EC2; color: #fff; border: none; border-radius: 7px; padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+.btn-primary:hover { background: #155fa8; }
+
+/* Add client form */
+.add-form { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; padding: 24px 28px; margin-bottom: 28px; display: none; }
+.add-form.open { display: block; }
+.form-title { font-size: 15px; font-weight: 700; color: #0A1C42; margin-bottom: 18px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 6px; }
+.field input, .field select { width: 100%; padding: 10px 13px; border: 1.5px solid #dde4ed; border-radius: 6px; font-size: 14px; font-family: inherit; color: #1a1a2e; background: #fafbfc; }
+.field input:focus, .field select:focus { outline: none; border-color: #1B6EC2; background: #fff; box-shadow: 0 0 0 3px rgba(27,110,194,0.08); }
+.field.has-error input { border-color: #c0392b; }
+.field-err { font-size: 12px; color: #c0392b; margin-top: 4px; display: none; }
+.field.has-error .field-err { display: block; }
+.form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn-cancel { background: none; border: 1.5px solid #dde4ed; color: #666; border-radius: 7px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-cancel:hover { background: #f5f7fa; }
+
+/* Table */
+.table-wrap { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: #f5f7fa; }
+th { padding: 11px 16px; font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; text-align: left; border-bottom: 1px solid #eef0f5; }
+td { padding: 13px 16px; font-size: 14px; color: #2c2c3e; border-bottom: 1px solid #f0f3f7; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafbfd; }
+.client-name { font-weight: 700; color: #0A1C42; }
+.client-org { font-size: 13px; color: #666; margin-top: 2px; }
+.badge-active   { background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.badge-inactive { background: #fff7e6; color: #b7620a; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.badge-archived { background: #f5f5f5; color: #999;    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.state-msg { padding: 56px 24px; text-align: center; color: #9aaabb; font-size: 15px; }
+.action-btn { background: none; border: 1.5px solid #dde4ed; color: #1B6EC2; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.action-btn:hover { border-color: #1B6EC2; background: #f0f6fe; }
+.action-btn:disabled { opacity: 0.5; cursor: default; }
+.action-btn.danger { color: #c0392b; }
+.action-btn.danger:hover { border-color: #c0392b; background: #fde9e7; }
+.status-select { font-size: 11px; font-weight: 700; border: none; border-radius: 12px; padding: 3px 9px; cursor: pointer; font-family: inherit; appearance: none; -webkit-appearance: none; }
+.status-select.active   { background: #e8f5e9; color: #2e7d32; }
+.status-select.inactive { background: #fff7e6; color: #b7620a; }
+.status-select.archived { background: #f5f5f5; color: #999; }
+
+/* Magic link modal */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(10,28,66,0.35); z-index: 100; align-items: center; justify-content: center; }
+.modal-backdrop.open { display: flex; }
+.modal { background: #fff; border-radius: 12px; padding: 28px 32px; width: 480px; max-width: 95vw; box-shadow: 0 8px 40px rgba(10,28,66,0.18); }
+.modal-title { font-size: 16px; font-weight: 700; color: #0A1C42; margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: #666; margin-bottom: 20px; }
+.modal-alert { border-radius: 7px; padding: 13px 16px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; }
+.modal-alert.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+.modal-alert.warn    { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+.link-box { display: flex; gap: 8px; }
+.link-box input { flex: 1; padding: 9px 12px; border: 1.5px solid #dde4ed; border-radius: 6px; font-size: 12px; font-family: monospace; background: #fafbfc; color: #1a1a2e; }
+.link-box input:focus { outline: none; }
+.btn-copy { background: #1B6EC2; color: #fff; border: none; border-radius: 6px; padding: 9px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.btn-copy:hover { background: #155fa8; }
+.modal-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+.btn-close { background: none; border: 1.5px solid #dde4ed; color: #666; border-radius: 7px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-close:hover { background: #f5f7fa; }
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; } .page { padding: 24px 16px; } .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div style="display:flex;align-items:center;">
+    <a href="/internal/" class="nav-brand">BW Advisory Solutions</a>
+    <span class="nav-tag">Internal</span>
+  </div>
+  <div class="nav-links">
+    <a href="/internal/" class="nav-link">Dashboard</a>
+    <a href="/internal/intakes.html" class="nav-link">Intakes</a>
+    <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
+    <a href="/internal/clients.html" class="nav-link active">Clients</a>
+    <a href="/internal/documents.html" class="nav-link">Documents</a>
+    <a href="/internal/invoices.html" class="nav-link">Invoices</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Clients</div>
+      <div class="page-sub">Active client records for document delivery and invoicing.</div>
+    </div>
+    <button class="btn-primary" onclick="toggleForm()">+ Add Client</button>
+  </div>
+
+  <div class="add-form" id="add-form">
+    <div class="form-title">New Client</div>
+    <div class="form-grid">
+      <div class="field" id="f-name">
+        <label>Full name *</label>
+        <input type="text" id="c-name" placeholder="e.g. Lynley Muollo-Gray">
+        <div class="field-err">Name is required.</div>
+      </div>
+      <div class="field" id="f-email">
+        <label>Email address *</label>
+        <input type="email" id="c-email" placeholder="email@example.com">
+        <div class="field-err">Valid email is required.</div>
+      </div>
+      <div class="field">
+        <label>Organisation</label>
+        <input type="text" id="c-org" placeholder="e.g. Gatha Security">
+      </div>
+      <div class="field">
+        <label>Sector</label>
+        <select id="c-sector" onchange="handleSectorChange()">
+          <option value="">Select sector</option>
+          <option>Law Enforcement</option>
+          <option>Government — Federal</option>
+          <option>Government — State</option>
+          <option>Government — Local</option>
+          <option>Defence &amp; National Security</option>
+          <option>Private Sector — Professional Services</option>
+          <option>Private Sector — Technology</option>
+          <option>Private Sector — Other</option>
+          <option>Not for Profit</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field" id="f-sector-other" style="display:none;">
+        <label>Please specify *</label>
+        <input type="text" id="c-sector-other" placeholder="Describe the sector">
+        <div class="field-err">Please specify the sector.</div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" id="btn-save" onclick="saveClient()">Save Client</button>
+      <button class="btn-cancel" onclick="toggleForm()">Cancel</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Sector</th><th>Status</th><th>Added</th><th></th></tr>
+      </thead>
+      <tbody id="clients-body">
+        <tr><td colspan="6" class="state-msg">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Magic link modal -->
+<div class="modal-backdrop" id="modal-link">
+  <div class="modal">
+    <div class="modal-title" id="ml-title">Client Portal Access</div>
+    <div class="modal-sub" id="ml-sub"></div>
+    <div class="modal-alert" id="ml-alert" style="display:none;"></div>
+    <div class="link-box" id="ml-link-box" style="display:none;">
+      <input type="text" id="ml-link-input" readonly>
+      <button class="btn-copy" onclick="copyLink()">Copy</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
+function signOut() { sessionStorage.removeItem('brad_api_key'); location.href = '/internal/'; }
+if (!getKey()) location.href = '/internal/';
+
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso) { try { return new Date(iso).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); } catch { return iso||'—'; } }
+
+let formOpen = false;
+function toggleForm() {
+  formOpen = !formOpen;
+  document.getElementById('add-form').classList.toggle('open', formOpen);
+  if (!formOpen) {
+    document.getElementById('f-sector-other').style.display = 'none';
+    document.getElementById('c-sector-other').value = '';
+  }
+}
+
+function handleSectorChange() {
+  const val = document.getElementById('c-sector').value;
+  document.getElementById('f-sector-other').style.display = val === 'Other' ? 'block' : 'none';
+  if (val !== 'Other') document.getElementById('c-sector-other').value = '';
+}
+
+async function saveClient() {
+  const name        = document.getElementById('c-name').value.trim();
+  const email       = document.getElementById('c-email').value.trim();
+  const org         = document.getElementById('c-org').value.trim();
+  const sectorVal   = document.getElementById('c-sector').value;
+  const sectorOther = document.getElementById('c-sector-other').value.trim();
+
+  const emailOk       = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const sectorOtherOk = sectorVal !== 'Other' || !!sectorOther;
+  const sector        = sectorVal === 'Other' && sectorOther ? sectorOther : sectorVal;
+
+  document.getElementById('f-name').classList.toggle('has-error', !name);
+  document.getElementById('f-email').classList.toggle('has-error', !emailOk);
+  document.getElementById('f-sector-other').classList.toggle('has-error', !sectorOtherOk);
+  if (!name || !emailOk || !sectorOtherOk) return;
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'add-client', name, email, organisation: org, sector }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    document.getElementById('c-name').value = '';
+    document.getElementById('c-email').value = '';
+    document.getElementById('c-org').value = '';
+    document.getElementById('c-sector').value = '';
+    document.getElementById('c-sector-other').value = '';
+    document.getElementById('f-sector-other').style.display = 'none';
+    toggleForm();
+    await loadClients();
+  } catch (e) { alert('Failed: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Save Client'; }
+}
+
+async function loadClients() {
+  const tbody = document.getElementById('clients-body');
+  tbody.innerHTML = '<tr><td colspan="6" class="state-msg">Loading…</td></tr>';
+  try {
+    const res = await fetch(`${API}?action=get-clients`, { headers: { 'x-portal-api-key': getKey() } });
+    if (res.status === 401) { signOut(); return; }
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    if (!json.clients.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="state-msg">No clients yet. Add one above.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = json.clients.map(c => {
+      const st = c.status || 'active';
+      return `
+      <tr>
+        <td><div class="client-name">${esc(c.name)}</div>${c.organisation?`<div class="client-org">${esc(c.organisation)}</div>`:''}</td>
+        <td>${esc(c.email)}</td>
+        <td>${esc(c.sector||'—')}</td>
+        <td>
+          <select class="status-select ${st}" onchange="updateStatus('${esc(c.id)}', this)">
+            <option value="active"   ${st==='active'   ?'selected':''}>Active</option>
+            <option value="inactive" ${st==='inactive' ?'selected':''}>Inactive</option>
+            <option value="archived" ${st==='archived' ?'selected':''}>Archived</option>
+          </select>
+        </td>
+        <td>${fmtDate(c.createdAt)}</td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="action-btn" id="btn-link-${esc(c.id)}" onclick="sendLink('${esc(c.id)}', '${esc(c.name)}', '${esc(c.email)}')">Send login link</button>
+          <button class="action-btn danger" onclick="deleteClient('${esc(c.id)}', '${esc(c.name)}', this)">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" class="state-msg">Failed to load: ${esc(e.message)}</td></tr>`;
+  }
+}
+
+async function updateStatus(id, select) {
+  const status = select.value;
+  select.className = `status-select ${status}`;
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'update-client', id, status }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+  } catch (e) {
+    alert('Failed to update status: ' + e.message);
+    await loadClients(); // revert on failure
+  }
+}
+
+async function deleteClient(id, name, btn) {
+  if (!confirm(`Delete client "${name}"? This cannot be undone.`)) return;
+  btn.disabled = true;
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'delete-client', id }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    await loadClients();
+  } catch (e) {
+    alert('Failed to delete: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+// ── Magic link ────────────────────────────────────────────────────────────────
+
+async function sendLink(clientId, clientName, clientEmail) {
+  const btn = document.getElementById(`btn-link-${clientId}`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  try {
+    const res  = await fetch(API, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body:    JSON.stringify({ action: 'send-magic-link', clientId }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+
+    // Show modal
+    document.getElementById('ml-title').textContent = `Client Portal — ${clientName}`;
+    document.getElementById('ml-sub').textContent   = clientEmail;
+
+    const alert   = document.getElementById('ml-alert');
+    const linkBox = document.getElementById('ml-link-box');
+
+    if (json.emailSent) {
+      alert.className   = 'modal-alert success';
+      alert.textContent = `Login link sent to ${clientEmail}. Valid for 7 days.`;
+      alert.style.display = 'block';
+      linkBox.style.display = 'none';
+    } else {
+      alert.className   = 'modal-alert warn';
+      alert.textContent = 'SMTP not configured — email not sent. Copy the link below and paste it into ProtonMail manually.';
+      alert.style.display  = 'block';
+      linkBox.style.display = 'flex';
+      document.getElementById('ml-link-input').value = json.link;
+    }
+
+    document.getElementById('modal-link').classList.add('open');
+  } catch (e) {
+    alert('Failed to generate link: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send login link'; }
+  }
+}
+
+function copyLink() {
+  const input = document.getElementById('ml-link-input');
+  input.select();
+  navigator.clipboard.writeText(input.value).catch(() => document.execCommand('copy'));
+  const btn = document.querySelector('.btn-copy');
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+}
+
+function closeModal() {
+  document.getElementById('modal-link').classList.remove('open');
+}
+
+document.getElementById('modal-link').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+loadClients();
+</script>
+</body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Portal — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; color: #2c2c3e; }
+
+/* Nav */
+.nav { background: #0A1C42; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0; }
+.nav-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.nav-brand img { height: 34px; width: auto; }
+.nav-brand-text { color: #fff; font-size: 15px; font-weight: 700; }
+.nav-tag { background: rgba(27,110,194,0.35); color: #7aaee8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; }
+.nav-client { color: #a8c0d8; font-size: 13px; }
+
+/* Loading / error screens */
+.screen { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.card { background: #fff; border-radius: 12px; border: 1px solid #dde4ed; padding: 48px 40px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 4px 24px rgba(10,28,66,0.07); }
+.card-icon { font-size: 40px; margin-bottom: 16px; }
+.card-title { font-size: 20px; font-weight: 700; color: #0A1C42; margin-bottom: 10px; }
+.card-body { font-size: 14px; color: #666; line-height: 1.7; }
+.card-body a { color: #1B6EC2; }
+.spinner { width: 36px; height: 36px; border: 3px solid #dde4ed; border-top-color: #1B6EC2; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Dashboard */
+.dashboard { display: none; flex: 1; flex-direction: column; }
+.welcome-bar { background: #0A1C42; padding: 28px 48px; }
+.welcome-title { font-size: 20px; font-weight: 700; color: #fff; }
+.welcome-sub { font-size: 13px; color: #a8c0d8; margin-top: 4px; }
+
+.content { padding: 36px 48px; flex: 1; }
+.section { margin-bottom: 40px; }
+.section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.section-title { font-size: 17px; font-weight: 700; color: #0A1C42; }
+.section-count { background: #EBF3FA; color: #1B6EC2; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+
+.table-wrap { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: #f5f7fa; }
+th { padding: 11px 18px; font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; text-align: left; border-bottom: 1px solid #eef0f5; }
+td { padding: 14px 18px; font-size: 14px; color: #2c2c3e; border-bottom: 1px solid #f0f3f7; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafbfd; }
+
+.file-name { font-weight: 600; color: #0A1C42; }
+.file-meta { font-size: 12px; color: #888; margin-top: 2px; }
+.inv-num { font-family: monospace; font-size: 13px; font-weight: 700; color: #0A1C42; }
+.amount { font-weight: 700; color: #0A1C42; text-align: right; }
+
+.badge-sent   { background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.badge-paid   { background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.badge-due    { background: #fff3e0; color: #e65100; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+.badge-upload { background: #EBF3FA; color: #1B6EC2; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+
+.btn-download { background: none; border: 1.5px solid #dde4ed; color: #1B6EC2; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-family: inherit; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+.btn-download:hover { border-color: #1B6EC2; background: #f0f6fe; }
+.btn-download.loading { opacity: 0.6; cursor: default; }
+.btn-preview { background: #1B6EC2; border: 1.5px solid #1B6EC2; color: #fff; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-family: inherit; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+.btn-preview:hover { background: #155fa8; border-color: #155fa8; }
+.btn-preview.loading { opacity: 0.6; cursor: default; }
+.btn-view { color: #1B6EC2; font-size: 13px; text-decoration: none; font-weight: 600; }
+.btn-view:hover { text-decoration: underline; }
+
+.empty-row td { text-align: center; color: #aab; font-size: 14px; padding: 40px 24px; }
+
+/* Footer */
+.footer { background: #0A1C42; padding: 20px 48px; margin-top: auto; }
+.footer-text { color: #a8c0d8; font-size: 12px; line-height: 1.7; }
+.footer-text a { color: #7aaee8; text-decoration: none; }
+
+@media (max-width: 640px) {
+  .nav { padding: 0 20px; }
+  .welcome-bar { padding: 22px 20px; }
+  .content { padding: 24px 20px; }
+  .footer { padding: 16px 20px; }
+  th, td { padding: 10px 12px; }
+  .nav-client { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="https://bwadvisorysolutions.com.au" class="nav-brand" target="_blank">
+    <img src="/assets/BW_Advisory_Solutions_Logo.png" alt="BW Advisory Solutions" onerror="this.style.display='none'">
+    <span class="nav-brand-text">BW Advisory Solutions</span>
+  </a>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <span class="nav-client" id="nav-client-name"></span>
+    <span class="nav-tag">Client Portal</span>
+    <button onclick="signOut()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:#EBF3FA;font-size:12px;padding:5px 12px;border-radius:4px;cursor:pointer;font-family:inherit;">Sign out</button>
+  </div>
+</nav>
+
+<!-- Loading -->
+<div class="screen" id="screen-loading">
+  <div class="card">
+    <div class="spinner"></div>
+    <div class="card-title">Verifying your access link…</div>
+  </div>
+</div>
+
+<!-- Error -->
+<div class="screen" id="screen-error" style="display:none;">
+  <div class="card">
+    <div class="card-icon">🔒</div>
+    <div class="card-title" id="err-title">Link invalid or expired</div>
+    <div class="card-body" id="err-body">This access link is no longer valid. Please contact <a href="mailto:brad@bwadvisorysolutions.com.au">brad@bwadvisorysolutions.com.au</a> to request a new one.</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+  <div class="welcome-bar">
+    <div class="welcome-title" id="welcome-name">Welcome</div>
+    <div class="welcome-sub" id="welcome-sub">BW Advisory Solutions — Client Portal</div>
+  </div>
+
+  <div class="content">
+
+    <!-- Documents -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Documents</div>
+        <span class="section-count" id="doc-count">0</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Delivered</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="docs-body">
+            <tr class="empty-row"><td colspan="4">Loading documents…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Invoices -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Invoices</div>
+        <span class="section-count" id="inv-count">0</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice</th>
+              <th>Date</th>
+              <th>Due</th>
+              <th style="text-align:right">Amount</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="invs-body">
+            <tr class="empty-row"><td colspan="6">Loading invoices…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <div class="footer">
+    <div class="footer-text">
+      <strong style="color:#fff;">Brad Warburton</strong> &nbsp;·&nbsp; BW Advisory Solutions &nbsp;·&nbsp; ABN 11 892 244 979<br>
+      <a href="mailto:brad@bwadvisorysolutions.com.au">brad@bwadvisorysolutions.com.au</a> &nbsp;·&nbsp;
+      +61 407 779 474 &nbsp;·&nbsp;
+      <a href="https://bwadvisorysolutions.com.au" target="_blank">bwadvisorysolutions.com.au</a>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Preview Modal -->
+<div id="preview-modal" style="display:none;position:fixed;inset:0;background:rgba(10,28,66,0.75);z-index:300;flex-direction:column;align-items:stretch;">
+  <div style="background:#0A1C42;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div style="color:#fff;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:12px;" id="preview-title"></div>
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <button id="preview-download-btn" style="background:none;border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:5px;cursor:pointer;font-family:inherit;">↓ Download</button>
+      <button onclick="closePreview()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;padding:0 4px;">&times;</button>
+    </div>
+  </div>
+  <iframe id="preview-iframe" style="flex:1;width:100%;border:none;background:#525659;" src="about:blank"></iframe>
+</div>
+
+<script>
+'use strict';
+const API   = '/.netlify/functions/portal-api';
+const HUB_INVOICE_BASE = 'https://bwadvisoryhub.netlify.app/invoice.html?num=';
+
+let clientToken   = null;   // legacy magic-link token (kept for tracking compat)
+let clientSession = null;   // session token (post-password auth)
+
+// ── Tracking ──────────────────────────────────────────────────────────────────
+
+let sessionId = null;
+function getSessionId() {
+  if (!sessionId) sessionId = `ses_${Date.now()}`;
+  return sessionId;
+}
+
+// Preview state
+let previewDocId     = null;
+let previewObjectURL = null;
+let previewOpenTime  = null;   // Date.now() when current visibility window started
+let previewAccumSec  = 0;      // accumulated active seconds before last tab-hide
+let previewIsVisible = true;
+
+async function trackEvent(docId, type, extras = {}) {
+  if (!clientSession && !clientToken) return;
+  try {
+    await fetch(API, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        action:          'track-document-event',
+        sessionToken:    clientSession || undefined,
+        token:           clientSession ? undefined : clientToken,
+        docId,
+        type,
+        sessionId:       getSessionId(),
+        durationSeconds: extras.durationSeconds ?? null,
+        userAgent:       navigator.userAgent.slice(0, 200),
+      }),
+    });
+  } catch { /* never block the user */ }
+}
+
+// Pause/resume timing when the tab goes hidden/visible
+document.addEventListener('visibilitychange', () => {
+  if (!previewDocId) return;
+  if (document.hidden) {
+    if (previewIsVisible && previewOpenTime !== null) {
+      previewAccumSec += Math.round((Date.now() - previewOpenTime) / 1000);
+      previewOpenTime  = null;
+    }
+    previewIsVisible = false;
+  } else {
+    previewIsVisible = true;
+    previewOpenTime  = Date.now();
+  }
+});
+
+// Best-effort preview_close on page unload (sendBeacon survives navigation)
+window.addEventListener('beforeunload', () => {
+  if (!previewDocId) return;
+  let totalSeconds = previewAccumSec;
+  if (previewIsVisible && previewOpenTime !== null)
+    totalSeconds += Math.round((Date.now() - previewOpenTime) / 1000);
+  const payload = JSON.stringify({
+    action:          'track-document-event',
+    sessionToken:    clientSession || undefined,
+    token:           clientSession ? undefined : clientToken,
+    docId:           previewDocId,
+    type:            'preview_close',
+    sessionId:       getSessionId(),
+    durationSeconds: totalSeconds,
+    userAgent:       navigator.userAgent.slice(0, 200),
+  });
+  navigator.sendBeacon(API, new Blob([payload], { type: 'application/json' }));
+});
+
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    // Handle YYYY-MM-DD strings without timezone shift
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      const [y,m,dy] = d.split('-');
+      return `${parseInt(dy,10)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m,10)-1]} ${y}`;
+    }
+    return new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch { return d; }
+}
+function fmtMoney(n) { return '$' + (Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function fmtSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function showError(title, body) {
+  document.getElementById('screen-loading').style.display = 'none';
+  document.getElementById('screen-error').style.display   = 'flex';
+  if (title) document.getElementById('err-title').textContent = title;
+  if (body)  document.getElementById('err-body').innerHTML   = body;
+}
+
+function showDashboard(client) {
+  document.getElementById('screen-loading').style.display = 'none';
+  document.getElementById('dashboard').style.display      = 'flex';
+  const name = client.organisation
+    ? `${client.name} — ${client.organisation}`
+    : client.name;
+  document.getElementById('welcome-name').textContent    = `Welcome, ${client.name}`;
+  document.getElementById('welcome-sub').textContent     = client.organisation || 'BW Advisory Solutions — Client Portal';
+  document.getElementById('nav-client-name').textContent = client.name;
+}
+
+async function init() {
+  // Session-based auth (post-password setup)
+  const storedSession = localStorage.getItem('bw_client_session');
+  if (storedSession) {
+    try {
+      const res  = await fetch(`${API}?action=verify-client-session&sessionToken=${encodeURIComponent(storedSession)}`);
+      const json = await res.json();
+      if (json.ok) {
+        clientSession = storedSession;
+        showDashboard(json.client);
+        loadData();
+        return;
+      }
+      // Session invalid or expired — clear and fall through to login
+      localStorage.removeItem('bw_client_session');
+    } catch { /* fall through */ }
+  }
+
+  // No valid session — redirect to login
+  window.location.replace('/client/login.html');
+}
+
+function signOut() {
+  localStorage.removeItem('bw_client_session');
+  window.location.replace('/client/login.html');
+}
+
+async function loadData() {
+  try {
+    const param = clientSession
+      ? `sessionToken=${encodeURIComponent(clientSession)}`
+      : `token=${encodeURIComponent(clientToken)}`;
+    const res  = await fetch(`${API}?action=get-client-data&${param}`);
+    const json = await res.json();
+    if (!json.ok) { console.error('get-client-data error:', json.error); return; }
+    renderDocuments(json.documents || []);
+    renderInvoices(json.invoices   || []);
+  } catch (e) {
+    console.error('loadData failed:', e);
+  }
+}
+
+// ── Documents ─────────────────────────────────────────────────────────────────
+
+function renderDocuments(docs) {
+  const tbody = document.getElementById('docs-body');
+  document.getElementById('doc-count').textContent = docs.length;
+
+  if (!docs.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No documents have been shared with you yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = docs.map(d => `
+    <tr>
+      <td>
+        <div class="file-name">${esc(d.fileName)}</div>
+        ${d.sizeBytes ? `<div class="file-meta">${fmtSize(d.sizeBytes)}</div>` : ''}
+      </td>
+      <td>${fmtDate(d.sentAt || d.uploadedAt)}</td>
+      <td>
+        ${d.status === 'sent'
+          ? '<span class="badge-sent">Delivered</span>'
+          : '<span class="badge-upload">Uploaded</span>'}
+      </td>
+      <td style="white-space:nowrap;">
+        ${d.fileUrl
+          ? `<a class="btn-preview" href="${esc(d.fileUrl)}" target="_blank" rel="noopener" style="text-decoration:none;">&#9741; Open</a>`
+          : d.fileType === 'application/pdf'
+            ? `<button class="btn-preview" onclick="openPreview('${esc(d.id)}', '${esc(d.fileName)}', this)">&#9741; Preview</button> `
+            : ''}
+        ${!d.fileUrl ? `<button class="btn-download" onclick="downloadDoc('${esc(d.id)}', '${esc(d.fileName)}', this)">&#8595; Download</button>` : ''}
+      </td>
+    </tr>`).join('');
+}
+
+async function downloadDoc(docId, fileName, btn) {
+  btn.classList.add('loading');
+  btn.textContent = 'Preparing…';
+  try {
+    const res  = await fetch(`${API}?action=get-client-document&${clientSession ? 'sessionToken=' + encodeURIComponent(clientSession) : 'token=' + encodeURIComponent(clientToken)}&docId=${encodeURIComponent(docId)}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+
+    // Track before triggering the browser download (await ensures it fires before any navigation)
+    await trackEvent(docId, 'download');
+
+    // Convert base64 to blob and trigger download
+    const byteChars   = atob(json.fileBase64);
+    const byteNumbers = new Uint8Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+    const blob    = new Blob([byteNumbers], { type: json.fileType || 'application/octet-stream' });
+    const url     = URL.createObjectURL(blob);
+    const anchor  = document.createElement('a');
+    anchor.href   = url;
+    anchor.download = json.fileName || fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Download failed: ' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '↓ Download';
+  }
+}
+
+async function openPreview(docId, fileName, btn) {
+  btn.classList.add('loading');
+  btn.textContent = 'Loading…';
+  try {
+    const res  = await fetch(`${API}?action=get-client-document&${clientSession ? 'sessionToken=' + encodeURIComponent(clientSession) : 'token=' + encodeURIComponent(clientToken)}&docId=${encodeURIComponent(docId)}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+
+    // Build object URL from base64
+    const byteChars   = atob(json.fileBase64);
+    const byteNumbers = new Uint8Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+    const blob = new Blob([byteNumbers], { type: 'application/pdf' });
+
+    // Revoke any previous object URL
+    if (previewObjectURL) URL.revokeObjectURL(previewObjectURL);
+    previewObjectURL = URL.createObjectURL(blob);
+
+    // Set up modal
+    document.getElementById('preview-title').textContent         = fileName;
+    document.getElementById('preview-iframe').src                = previewObjectURL;
+    document.getElementById('preview-download-btn').onclick      = () => downloadDoc(docId, fileName, document.getElementById('preview-download-btn'));
+
+    // Reset timing state
+    previewDocId     = docId;
+    previewAccumSec  = 0;
+    previewIsVisible = !document.hidden;
+    previewOpenTime  = previewIsVisible ? Date.now() : null;
+
+    // Show modal
+    document.getElementById('preview-modal').style.display = 'flex';
+
+    // Fire preview_open event
+    await trackEvent(docId, 'preview_open');
+
+  } catch (e) {
+    alert('Preview failed: ' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '⌕ Preview';
+  }
+}
+
+async function closePreview() {
+  if (!previewDocId) return;
+
+  // Hide modal immediately
+  document.getElementById('preview-modal').style.display = 'none';
+  document.getElementById('preview-iframe').src = 'about:blank';
+
+  // Calculate total active seconds
+  let totalSeconds = previewAccumSec;
+  if (previewIsVisible && previewOpenTime !== null)
+    totalSeconds += Math.round((Date.now() - previewOpenTime) / 1000);
+
+  const docId = previewDocId;
+
+  // Clear state before async call
+  previewDocId     = null;
+  previewOpenTime  = null;
+  previewAccumSec  = 0;
+  if (previewObjectURL) { URL.revokeObjectURL(previewObjectURL); previewObjectURL = null; }
+
+  // Fire preview_close with duration
+  await trackEvent(docId, 'preview_close', { durationSeconds: totalSeconds });
+}
+
+// ── Invoices ──────────────────────────────────────────────────────────────────
+
+function renderInvoices(invoices) {
+  const tbody = document.getElementById('invs-body');
+  document.getElementById('inv-count').textContent = invoices.length;
+
+  if (!invoices.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No invoices on record.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = invoices.map(inv => `
+    <tr>
+      <td><span class="inv-num">${esc(inv.num)}</span></td>
+      <td>${fmtDate(inv.date)}</td>
+      <td>${fmtDate(inv.due)}</td>
+      <td class="amount">${fmtMoney(inv.total)}</td>
+      <td>
+        ${inv.status === 'paid'
+          ? `<span class="badge-paid">Paid</span>${inv.paidDate ? `<div style="font-size:11px;color:#888;margin-top:3px">${fmtDate(inv.paidDate)}</div>` : ''}`
+          : `<span class="badge-due">Due ${fmtDate(inv.due)}</span>`}
+      </td>
+      <td>
+        <a href="${HUB_INVOICE_BASE}${encodeURIComponent(inv.num)}" target="_blank" class="btn-view">View invoice →</a>
+      </td>
+    </tr>`).join('');
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

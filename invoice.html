@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BW Advisory Solutions — Tax Invoice</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #f5f3ef; color: #1a1410; font-size: 13px; }
+
+    #loading, #error-msg {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; font-size: 14px; color: #8a7e70;
+    }
+    #error-msg { color: #c0392b; }
+
+    #toolbar {
+      position: sticky; top: 0; z-index: 100;
+      background: #0f2540; padding: 10px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    }
+    #toolbar span { font-size: 12px; color: #94a3b8; letter-spacing: .04em; }
+    #toolbar button {
+      background: #1B6EC2; color: #fff; border: none; border-radius: 6px;
+      padding: 7px 18px; font-size: 12px; font-weight: 500; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; letter-spacing: .02em;
+    }
+    #toolbar button:hover { background: #1558a0; }
+
+    #invoice-container { max-width: 760px; margin: 32px auto 60px; padding: 0 16px; }
+
+    /* ── Invoice styles — exact copy from Hub's openPrintView ── */
+    .inv-wrap { background: #fff; border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,.08); padding: 40px 48px; }
+    .inv-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem; }
+    .inv-logo-img { height:60px; width:auto; display:block; margin-bottom:8px; }
+    .inv-logo-txt { font-family:'DM Serif Display',serif; font-size:20px; color:#0f2540; letter-spacing:.02em; }
+    .inv-logo-sub { font-size:10px; color:#8a7e70; letter-spacing:.06em; display:block; margin-top:3px; }
+    .inv-title-block { text-align:right; }
+    .inv-title-block h2 { font-family:'DM Serif Display',serif; font-size:28px; color:#1a1410; letter-spacing:.06em; }
+    .inv-title-block p { font-size:11px; color:#8a7e70; margin-top:2px; }
+    .inv-meta { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
+    .inv-meta-label { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:#8a7e70; margin-bottom:5px; }
+    .inv-table { width:100%; border-collapse:collapse; margin-bottom:1.25rem; }
+    .inv-table th { font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:#8a7e70; padding:6px 8px; border-bottom:0.5px solid #c5bfb4; }
+    .inv-table th:not(:first-child) { text-align:right; }
+    .inv-table td { padding:9px 8px; font-size:12px; border-bottom:0.5px solid #e2ddd5; }
+    .inv-table td:not(:first-child) { text-align:right; }
+    .inv-totals-block { margin-left:auto; width:240px; font-size:12px; }
+    .inv-total-line { display:flex; justify-content:space-between; padding:3px 0; color:#4a4035; }
+    .inv-total-line.grand { border-top:0.5px solid #c5bfb4; margin-top:6px; padding-top:8px; font-weight:500; font-size:14px; color:#0f2540; }
+    .inv-bank-section { margin-top:1.5rem; padding-top:1rem; border-top:0.5px solid #e2ddd5; }
+    .inv-bank-label { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:#8a7e70; margin-bottom:8px; }
+    .inv-bank-grid { display:grid; grid-template-columns:110px 1fr; gap:3px 10px; font-size:11px; color:#4a4035; }
+    .inv-bank-key { color:#8a7e70; }
+    .inv-ref-box { margin-top:10px; padding:7px 12px; background:#f0ede6; border-radius:6px; font-size:11px; color:#4a4035; }
+    .inv-footer { margin-top:1.5rem; display:flex; justify-content:space-between; font-size:9px; color:#8a7e70; border-top:0.5px solid #e2ddd5; padding-top:.75rem; }
+
+    @media print {
+      body { background: #fff; }
+      #toolbar { display: none !important; }
+      #invoice-container { margin: 0; max-width: 100%; padding: 0; }
+      .inv-wrap { box-shadow: none; border-radius: 0; padding: 15mm; }
+      @page { margin: 0; }
+    }
+    @media (max-width: 600px) {
+      .inv-wrap { padding: 24px 20px; }
+      .inv-top { flex-direction: column; gap: 16px; }
+      .inv-title-block { text-align: left; }
+      .inv-meta { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">Loading invoice…</div>
+<div id="error-msg" style="display:none"></div>
+
+<div id="toolbar" style="display:none">
+  <span id="toolbar-label"></span>
+  <button onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div id="invoice-container" style="display:none">
+  <div id="invoice-root"></div>
+</div>
+
+<script>
+  const API = '/.netlify/functions/hub-api';
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function fmt(n) {
+    return '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  }
+  function fmtDate(d) {
+    if (!d) return '';
+    const [y, m, day] = d.split('-');
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+  }
+
+  // Exact copy of buildInvoiceHTML from index.html
+  // profile is hardcoded for BW Advisory Solutions; wisePaymentLink taken from invoice if present
+  function buildInvoiceHTML(inv) {
+    const profile = {
+      bizName: 'BW Advisory Solutions',
+      abn: '11 892 244 979',
+      wisePaymentLink: inv.wisePaymentLink || ''
+    };
+
+    const sub = inv.items.reduce((s,l) => s + l.qty*l.price, 0);
+    const gstAmt = sub * (inv.gstRate||0);
+    const total = sub + gstAmt;
+    const lineRows = inv.items.map(l => `
+      <tr>
+        <td>${l.desc||'—'}</td>
+        <td style="text-align:right">${l.qty}</td>
+        <td style="text-align:right">${fmt(l.price)}</td>
+        <td style="text-align:right">${fmt(l.qty*l.price*(inv.gstRate||0))}</td>
+        <td style="text-align:right">${fmt(l.qty*l.price*(1+(inv.gstRate||0)))}</td>
+      </tr>`).join('');
+
+    return `
+  <div class="inv-wrap">
+    <div class="inv-top">
+      <div>
+        <img src="/assets/logo.jpg" class="inv-logo-img" alt="BW Advisory Solutions">
+        <div style="font-size:10px;color:#8a7e70;margin-top:4px">ABN ${esc(profile.abn)}</div>
+        <div style="font-size:10px;color:#8a7e70;margin-top:2px">brad@bwadvisorysolutions.com.au</div>
+        <div style="font-size:10px;color:#8a7e70">+61 407 779 474</div>
+        <div style="font-size:10px;color:#8a7e70">bwadvisorysolutions.com.au</div>
+      </div>
+      <div class="inv-title-block">
+        <h2>TAX INVOICE</h2>
+        <p>${esc(inv.num)}</p>
+      </div>
+    </div>
+
+    <div class="inv-meta">
+      <div>
+        <div class="inv-meta-label">Bill to</div>
+        <div style="font-size:14px;font-weight:500">${esc(inv.client||'')}</div>
+        ${inv.addr ? `<div style="font-size:11px;color:#4a4035;margin-top:4px;white-space:pre-line">${esc(inv.addr)}</div>` : ''}
+      </div>
+      <div style="text-align:right">
+        <div style="margin-bottom:8px">
+          <div class="inv-meta-label">Invoice details</div>
+          <div style="font-size:11px;color:#4a4035">Invoice date: <strong>${fmtDate(inv.date)}</strong></div>
+          <div style="font-size:11px;color:#4a4035">Payment due: <strong>${fmtDate(inv.due)}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <table class="inv-table">
+      <thead>
+        <tr>
+          <th style="text-align:left">Description</th>
+          <th>Qty</th>
+          <th>Unit price</th>
+          <th>GST</th>
+          <th>Total (incl. GST)</th>
+        </tr>
+      </thead>
+      <tbody>${lineRows}</tbody>
+    </table>
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1.5rem">
+      <div class="inv-totals-block">
+        <div class="inv-total-line"><span>Subtotal (excl GST)</span><span>${fmt(sub)}</span></div>
+        <div class="inv-total-line"><span>GST ${Math.round((inv.gstRate||0)*100)}%</span><span>${fmt(gstAmt)}</span></div>
+        <div class="inv-total-line grand"><span>Amount due (AUD)</span><span>${fmt(total)}</span></div>
+        ${inv.fxEnabled && inv.fxRate && inv.fxCurrency ? `
+        <div style="margin-top:12px;padding:12px;background:#f5f8f3;border-radius:6px;border:0.5px solid #c3d9b8;font-size:12px">
+          <div style="font-weight:700;color:#2d5a27;text-transform:uppercase;letter-spacing:.07em;font-size:10px;margin-bottom:8px">Currency Conversion</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:#555">Exchange rate (1 AUD =)</span><span style="font-weight:500">${parseFloat(inv.fxRate).toFixed(4)} ${esc(inv.fxCurrency)}</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:#555">FX surcharge (${((inv.fxBuffer||0)*100).toFixed(1)}%)</span><span style="font-weight:500">${fmt(total*(inv.fxBuffer||0))}</span></div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:13px;border-top:0.5px solid #c3d9b8;padding-top:6px;margin-top:4px"><span>Total ${esc(inv.fxCurrency)}</span><span>${((total*(1+(inv.fxBuffer||0)))*parseFloat(inv.fxRate)).toFixed(2)} ${esc(inv.fxCurrency)}</span></div>
+        </div>` : ''}
+      </div>
+    </div>
+
+    <div class="inv-bank-section">
+      ${(() => {
+        const showAUD = (inv.paymentMode === 'aud' || inv.paymentMode === 'both');
+        const showINT = (inv.paymentMode === 'nzd' || inv.paymentMode === 'both');
+        const audBlock = showAUD ? `
+          <div class="inv-bank-label">${showINT ? 'Bank Transfer \u2014 AUD' : 'Payment Details'}</div>
+          <div class="inv-bank-grid">
+            <span class="inv-bank-key">Account name</span><span>${esc(inv.bankName||'')}</span>
+            <span class="inv-bank-key">BSB</span><span>${esc(inv.bankBSB||'')}</span>
+            <span class="inv-bank-key">Account number</span><span>${esc(inv.bankAccount||'')}</span>
+            ${inv.bankPayID ? '<span class="inv-bank-key">PayID</span><span>' + esc(inv.bankPayID) + '</span>' : ''}
+            <span class="inv-bank-key">Currency</span><span>AUD</span>
+          </div>` : '';
+        const intBlock = showINT ? `
+          <div class="inv-bank-label" style="${showAUD ? 'margin-top:14px;' : ''}">International Bank Transfer</div>
+          <div class="inv-bank-grid">
+            <span class="inv-bank-key">Account name</span><span>${esc(inv.wiseName||'')}</span>
+            <span class="inv-bank-key">Bank</span><span>${esc(inv.wiseBank||'')}</span>
+            <span class="inv-bank-key">Account number</span><span>${esc(inv.wiseAccount||'')}</span>
+            ${inv.wiseSwift ? '<span class="inv-bank-key">SWIFT / BIC</span><span>' + esc(inv.wiseSwift) + '</span>' : ''}
+            ${inv.wiseRouting ? '<span class="inv-bank-key">Routing</span><span>' + esc(inv.wiseRouting) + '</span>' : ''}
+            <span class="inv-bank-key">Currency</span><span>${esc(inv.wiseCurrency||'NZD')}</span>
+          </div>` : '';
+        return audBlock + intBlock;
+      })()}
+      <div class="inv-ref-box">When paying by EFT, please use the reference: <strong>${esc(inv.num)}</strong></div>
+      ${inv.onlinePayEnabled ? (() => {
+        const ccRate = inv.ccRate || 0.035;
+        const audWithCC = total * (1 + ccRate);
+        const fxAmountStr = (inv.fxEnabled && inv.fxRate && inv.fxCurrency)
+          ? ' ($' + (audWithCC * (1+(inv.fxBuffer||0)) * parseFloat(inv.fxRate)).toFixed(2) + ' ' + inv.fxCurrency + ')'
+          : '';
+        const payBtn = profile.wisePaymentLink
+          ? `<a href="${esc(profile.wisePaymentLink)}" target="_blank" style="display:inline-block;background:#0f2540;color:#fff;font-family:sans-serif;font-size:12px;font-weight:600;padding:9px 20px;border-radius:6px;text-decoration:none;white-space:nowrap;flex-shrink:0">Pay Now \u2192</a>`
+          : '';
+        return `<div style="margin-top:10px;padding:11px 14px;background:#f0f7ff;border-radius:6px;border:0.5px solid #c3dafe">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#1e40af;margin-bottom:7px">Pay online \u2014 instant &amp; secure</div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <svg width="36" height="23" viewBox="0 0 38 24" style="border-radius:3px" xmlns="http://www.w3.org/2000/svg"><rect width="38" height="24" rx="3" fill="#1A1F71"/><text x="19" y="16.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" font-style="italic" fill="#FFFFFF" letter-spacing="0.5">VISA</text></svg>
+                <svg width="36" height="23" viewBox="0 0 38 24" style="border-radius:3px" xmlns="http://www.w3.org/2000/svg"><rect width="38" height="24" rx="3" fill="#252525"/><circle cx="14" cy="12" r="7" fill="#EB001B"/><circle cx="24" cy="12" r="7" fill="#F79E1B"/><path d="M19 6.8a7 7 0 0 1 0 10.4A7 7 0 0 1 19 6.8z" fill="#FF5F00"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="23" viewBox="0 0 52 23" style="border-radius:3px"><rect width="52" height="23" rx="3" fill="#000"/><path d="M13.2 4.8c.6-.8 1-1.8.9-2.8-.9.1-2 .6-2.6 1.4-.6.7-.9 1.7-.8 2.6 1 .1 2-.4 2.5-1.2zM14.1 6c-1.4-.1-2.6.8-3.2.8-.7 0-1.7-.8-2.8-.7-1.4 0-2.7.8-3.4 2.1-1.5 2.5-.4 6.2 1 8.2.7 1 1.5 2.1 2.6 2 1-.1 1.4-.7 2.7-.7 1.2 0 1.6.7 2.7.7 1.1 0 1.8-1 2.5-2 .8-1.1 1.1-2.2 1.1-2.3 0 0-2.1-.8-2.2-3.2 0-2 1.7-3 1.7-3-.9-1.4-2.4-1.9-2.7-1.9z" fill="white"/><text x="36" y="16" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="700" fill="#fff" letter-spacing="0.3">Pay</text></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="58" height="23" viewBox="0 0 58 23" style="border-radius:4px;border:0.5px solid #dadce0"><rect width="58" height="23" rx="4" fill="#fff"/><path d="M3,11.5 A8,8,0,0,1,11,3.5 L11,7 A4.5,4.5,0,0,0,6.5,11.5 Z" fill="#4285F4"/><path d="M11,3.5 A8,8,0,0,1,19,11.5 L15.5,11.5 A4.5,4.5,0,0,0,11,7 Z" fill="#EA4335"/><path d="M19,11.5 A8,8,0,0,1,11,19.5 L11,16 A4.5,4.5,0,0,0,15.5,11.5 Z" fill="#FBBC05"/><path d="M11,19.5 A8,8,0,0,1,3,11.5 L6.5,11.5 A4.5,4.5,0,0,0,11,16 Z" fill="#34A853"/><rect x="11" y="3" width="8" height="7.5" fill="#fff"/><circle cx="11" cy="11.5" r="4.5" fill="#fff"/><rect x="11" y="10" width="7" height="3" fill="#EA4335"/><line x1="25" y1="4" x2="25" y2="19" stroke="#dadce0" stroke-width="0.8"/><text x="41" y="16" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="9.5" font-weight="500" fill="#5f6368">Pay</text></svg>
+                <span style="font-size:10px;color:#3b82f6;padding:2px 7px;border:0.5px solid #93c5fd;border-radius:3px;white-space:nowrap">Bank transfer</span>
+              </div>
+              <div style="font-size:10px;color:#64748b;margin-top:7px">A ${(ccRate*100).toFixed(1)}% processing fee applies when paying by card. Card total: <strong>${fmt(audWithCC)} AUD${fxAmountStr}</strong></div>
+            </div>
+            ${payBtn}
+          </div>
+        </div>`;
+      })() : ''}
+    </div>
+
+    ${inv.notes ? `<div style="margin-top:1rem;font-size:11px;color:#8a7e70;border-top:0.5px solid #e2ddd5;padding-top:.75rem">${esc(inv.notes)}</div>` : ''}
+
+    <div class="inv-footer">
+      <span>${esc(profile.bizName)} · ABN ${esc(profile.abn)} · GST registered</span>
+      <span>Private &amp; Confidential</span>
+    </div>
+  </div>`;
+  }
+
+  async function loadInvoice() {
+    const params = new URLSearchParams(window.location.search);
+    const num = params.get('num');
+    const token = params.get('token') || undefined;
+
+    if (!num) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-msg').style.display = 'flex';
+      document.getElementById('error-msg').textContent = 'No invoice number specified. Use ?num=INV-0003&token=...';
+      return;
+    }
+
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get-invoice', num, token }),
+      });
+      const data = await res.json();
+
+      if (!data.ok || !data.invoice) throw new Error(data.error || 'Invoice not found');
+
+      const inv = data.invoice;
+      document.title = `${inv.num} — BW Advisory Solutions`;
+      document.getElementById('toolbar-label').textContent = `${inv.num} · ${inv.client}`;
+      document.getElementById('invoice-root').innerHTML = buildInvoiceHTML(inv);
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('toolbar').style.display = 'flex';
+      document.getElementById('invoice-container').style.display = 'block';
+
+    } catch (err) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-msg').style.display = 'flex';
+      document.getElementById('error-msg').textContent = 'Could not load invoice: ' + err.message;
+    }
+  }
+
+  loadInvoice();
+</script>
+
+</body>
+</html>

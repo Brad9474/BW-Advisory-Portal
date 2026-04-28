@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set Up Your Access — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  background: #f5f7fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px 48px;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 28px;
+  text-decoration: none;
+  display: block;
+}
+.brand-name { font-size: 16px; font-weight: 700; color: #0A1C42; letter-spacing: 0.3px; }
+.brand-tagline { font-size: 12px; color: #7a8fa8; margin-top: 3px; }
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 32px rgba(10,28,66,0.1);
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+}
+.card-header { background: #0A1C42; padding: 24px 32px; }
+.card-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #7aaee8; font-weight: 700; margin-bottom: 8px; }
+.card-title { color: #fff; font-size: 18px; font-weight: 700; }
+.card-sub { color: #a8c0d8; font-size: 13px; margin-top: 4px; }
+.card-body { padding: 28px 32px; }
+
+/* Loading / error states */
+.state { text-align: center; padding: 12px 0; }
+.spinner { width: 32px; height: 32px; border: 3px solid #dde4ed; border-top-color: #1B6EC2; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.state-title { font-size: 16px; font-weight: 700; color: #0A1C42; margin-bottom: 8px; }
+.state-body { font-size: 14px; color: #666; line-height: 1.7; }
+.state-body a { color: #1B6EC2; }
+
+/* Form */
+.form { display: none; }
+.welcome-name { font-size: 15px; color: #0A1C42; font-weight: 700; margin-bottom: 4px; }
+.welcome-org { font-size: 13px; color: #888; margin-bottom: 24px; }
+.field { margin-bottom: 20px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 7px; }
+.field input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid #dde4ed; border-radius: 7px;
+  font-size: 15px; font-family: inherit; color: #1a1a2e;
+  background: #fafbfc; transition: border-color 0.18s;
+}
+.field input:focus { outline: none; border-color: #1B6EC2; background: #fff; box-shadow: 0 0 0 3px rgba(27,110,194,0.08); }
+.field.has-error input { border-color: #c0392b; }
+.field-err { font-size: 12px; color: #c0392b; margin-top: 5px; display: none; }
+.field.has-error .field-err { display: block; }
+.hint { font-size: 12px; color: #9aaabb; margin-top: 5px; }
+.btn-submit {
+  width: 100%; background: #1B6EC2; color: #fff;
+  border: none; border-radius: 7px; padding: 13px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: background 0.15s; margin-top: 4px;
+}
+.btn-submit:hover { background: #155fa8; }
+.btn-submit:disabled { background: #C0C8D0; cursor: not-allowed; }
+
+/* Already has account state */
+.has-account { display: none; text-align: center; }
+.has-account .icon { font-size: 36px; margin-bottom: 14px; }
+.btn-login {
+  display: inline-block; background: #1B6EC2; color: #fff;
+  border: none; border-radius: 7px; padding: 12px 28px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit; text-decoration: none; margin-top: 16px;
+}
+.btn-login:hover { background: #155fa8; }
+
+.footer-link { text-align: center; margin-top: 20px; font-size: 13px; color: #888; }
+.footer-link a { color: #1B6EC2; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<a href="https://bwadvisorysolutions.com.au" class="brand">
+  <div class="brand-name">BW Advisory Solutions</div>
+  <div class="brand-tagline">Client Portal</div>
+</a>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-label">Client Portal</div>
+    <div class="card-title" id="card-title">Setting up your access…</div>
+    <div class="card-sub" id="card-sub"></div>
+  </div>
+  <div class="card-body">
+
+    <!-- Loading state -->
+    <div class="state" id="state-loading">
+      <div class="spinner"></div>
+      <div class="state-body">Verifying your access link…</div>
+    </div>
+
+    <!-- Error state -->
+    <div class="state" id="state-error" style="display:none;">
+      <div class="state-title" id="err-title">Link invalid or expired</div>
+      <div class="state-body" id="err-body">
+        This link is no longer valid. Please contact
+        <a href="mailto:brad@bwadvisorysolutions.com.au">brad@bwadvisorysolutions.com.au</a>
+        to request a new one.
+      </div>
+    </div>
+
+    <!-- Already has password — offer sign in OR reset -->
+    <div class="has-account" id="state-has-account">
+      <div class="icon">🔐</div>
+      <div class="state-title">You already have an account</div>
+      <div class="state-body">Your portal access is already set up. Sign in with your existing password, or use this link to set a new one.</div>
+      <a href="/client/login.html" class="btn-login">Sign in</a>
+      <div style="margin-top:14px;">
+        <button onclick="showResetForm()" style="background:none;border:none;color:#1B6EC2;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:3px;">Forgot your password? Set a new one →</button>
+      </div>
+    </div>
+
+    <!-- Create password form -->
+    <div class="form" id="form-create">
+      <div class="welcome-name" id="welcome-name"></div>
+      <div class="welcome-org" id="welcome-org"></div>
+
+      <div class="field" id="f-password">
+        <label for="password">Create a password</label>
+        <input type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password">
+        <div class="hint">You will use this password to sign in on future visits.</div>
+        <div class="field-err" id="password-err">Please enter a password of at least 8 characters.</div>
+      </div>
+
+      <div class="field" id="f-confirm">
+        <label for="confirm">Confirm password</label>
+        <input type="password" id="confirm" placeholder="Re-enter your password" autocomplete="new-password">
+        <div class="field-err" id="confirm-err">Passwords do not match.</div>
+      </div>
+
+      <button class="btn-submit" id="btn-submit" onclick="submitSetup()">Create my account</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer-link">
+  Need help? <a href="mailto:brad@bwadvisorysolutions.com.au">brad@bwadvisorysolutions.com.au</a>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+let magicToken = null;
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  magicToken   = params.get('token');
+
+  if (!magicToken) {
+    showError('No access link', 'No access token was found. Please use the link sent to your email.');
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${API}?action=verify-token&token=${encodeURIComponent(magicToken)}`);
+    const json = await res.json();
+
+    if (!json.ok) {
+      showError('Link invalid or expired', json.error + ' Please contact <a href="mailto:brad@bwadvisorysolutions.com.au">brad@bwadvisorysolutions.com.au</a> to request a new link.');
+      return;
+    }
+
+    // Store client name/org for both paths
+    document.getElementById('welcome-name').textContent = json.client.name;
+    document.getElementById('welcome-org').textContent  = json.client.organisation || '';
+
+    if (json.hasPassword) {
+      // Already has a password — offer sign in or reset
+      showState('state-has-account');
+      document.getElementById('card-title').textContent = 'Account already active';
+      return;
+    }
+
+    // First time — show password creation form
+    document.getElementById('card-title').textContent = 'Create your password';
+    document.getElementById('card-sub').textContent   = 'Choose a password to secure your portal access.';
+    showState('form-create');
+
+  } catch {
+    showError('Connection error', 'Unable to verify your link. Please check your connection and try again.');
+  }
+}
+
+async function submitSetup() {
+  const password = document.getElementById('password').value;
+  const confirm  = document.getElementById('confirm').value;
+
+  let valid = true;
+
+  setErr('f-password', 'password-err', false);
+  setErr('f-confirm',  'confirm-err',  false);
+
+  if (password.length < 8) {
+    setErr('f-password', 'password-err', true);
+    valid = false;
+  }
+  if (password !== confirm) {
+    setErr('f-confirm', 'confirm-err', true);
+    valid = false;
+  }
+  if (!valid) return;
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled    = true;
+  btn.textContent = 'Setting up…';
+
+  try {
+    const res  = await fetch(API, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ action: 'setup-client-password', token: magicToken, password }),
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      setErr('f-password', 'password-err', true, json.error || 'Setup failed. Please try again.');
+      btn.disabled    = false;
+      btn.textContent = 'Create my account';
+      return;
+    }
+
+    // Store session and go to dashboard
+    localStorage.setItem('bw_client_session', json.sessionToken);
+    window.location.replace('/client/');
+
+  } catch {
+    setErr('f-password', 'password-err', true, 'Connection error. Please try again.');
+    btn.disabled    = false;
+    btn.textContent = 'Create my account';
+  }
+}
+
+function showResetForm() {
+  showState('form-create');
+  document.getElementById('card-title').textContent = 'Reset your password';
+  document.getElementById('card-sub').textContent   = 'Set a new password for your portal access.';
+  document.getElementById('btn-submit').textContent = 'Set new password';
+  document.getElementById('password').focus();
+}
+
+function showState(id) {
+  ['state-loading','state-error','state-has-account','form-create'].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.style.display = (s === id) ? (s === 'form-create' || s === 'state-has-account' ? 'block' : 'block') : 'none';
+  });
+}
+
+function showError(title, body) {
+  showState('state-error');
+  document.getElementById('card-title').textContent = title;
+  if (title) document.getElementById('err-title').textContent = title;
+  if (body)  document.getElementById('err-body').innerHTML    = body;
+}
+
+function setErr(fieldId, errId, show, msg) {
+  document.getElementById(fieldId).classList.toggle('has-error', show);
+  if (msg) document.getElementById(errId).textContent = msg;
+}
+
+document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('confirm').focus(); });
+document.getElementById('confirm') .addEventListener('keydown', e => { if (e.key === 'Enter') submitSetup(); });
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internal Dashboard — BW Advisory Solutions</title>
+    <link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  background: #f5f7fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Nav ── */
+.nav {
+  background: #0A1C42;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.nav-tag {
+  background: rgba(27,110,194,0.35);
+  color: #7aaee8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-left: 12px;
+}
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-link { color: #EBF3FA; font-size: 13px; text-decoration: none; opacity: 0.75; }
+.nav-link:hover { opacity: 1; }
+.btn-signout {
+  background: none; border: 1px solid rgba(255,255,255,0.2);
+  color: #EBF3FA; font-size: 12px; padding: 5px 12px;
+  border-radius: 4px; cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.btn-signout:hover { background: rgba(255,255,255,0.1); }
+
+/* ── Login gate ── */
+.gate {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.gate-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 32px rgba(10,28,66,0.1);
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+}
+.gate-header {
+  background: #0A1C42;
+  padding: 24px 32px;
+}
+.gate-title { color: #fff; font-size: 17px; font-weight: 700; }
+.gate-sub { color: #a8c0d8; font-size: 12px; margin-top: 4px; }
+.gate-body { padding: 28px 32px; }
+.field { margin-bottom: 20px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 7px; }
+.field input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid #dde4ed; border-radius: 7px;
+  font-size: 15px; font-family: inherit; color: #1a1a2e;
+  background: #fafbfc; transition: border-color 0.18s;
+}
+.field input:focus { outline: none; border-color: #1B6EC2; background: #fff; box-shadow: 0 0 0 3px rgba(27,110,194,0.08); }
+.field.has-error input { border-color: #c0392b; }
+.field-err { font-size: 12px; color: #c0392b; margin-top: 5px; display: none; }
+.field.has-error .field-err { display: block; }
+.btn-login {
+  width: 100%; background: #1B6EC2; color: #fff;
+  border: none; border-radius: 7px; padding: 13px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: background 0.15s;
+}
+.btn-login:hover { background: #155fa8; }
+.btn-login:disabled { background: #C0C8D0; cursor: not-allowed; }
+
+/* ── Dashboard (post-login) ── */
+.dashboard { flex: 1; padding: 40px 48px; display: none; }
+.page-title { font-size: 24px; font-weight: 700; color: #0A1C42; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: #6a7a8a; margin-bottom: 36px; }
+
+/* KPI Cards */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 36px; }
+.kpi-card {
+  background: #fff; border-radius: 10px;
+  border: 1px solid #dde4ed; padding: 24px;
+  text-decoration: none; transition: box-shadow 0.18s;
+}
+.kpi-card:hover { box-shadow: 0 4px 20px rgba(10,28,66,0.1); }
+.kpi-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #6a7a8a; font-weight: 700; margin-bottom: 10px; }
+.kpi-value { font-size: 32px; font-weight: 700; color: #0A1C42; margin-bottom: 4px; }
+.kpi-subtext { font-size: 12px; color: #9aaabb; }
+
+/* Pipeline */
+.section { margin-bottom: 36px; }
+.section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.section-title { font-size: 16px; font-weight: 700; color: #0A1C42; text-transform: uppercase; letter-spacing: 1px; }
+.btn-refresh { background: #fff; border: 1px solid #dde4ed; color: #0A1C42; padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; transition: all 0.18s; }
+.btn-refresh:hover { background: #f5f7fa; border-color: #1B6EC2; }
+.pipeline { display: flex; justify-content: space-around; align-items: flex-end; min-height: 180px; gap: 20px; }
+.pipeline-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.pipeline-bar { width: 50px; background: linear-gradient(180deg, #1B6EC2, #0A5BA8); border-radius: 6px 6px 0 0; margin-bottom: 12px; position: relative; }
+.pipeline-count { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); font-weight: 700; font-size: 18px; color: #0A1C42; }
+.pipeline-label { font-size: 12px; color: #6a7a8a; text-align: center; min-width: 70px; }
+
+/* Quick Actions */
+.quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.action-card { background: #fff; border-radius: 10px; border: 1px solid #dde4ed; padding: 20px; cursor: pointer; transition: all 0.18s; }
+.action-card:hover { box-shadow: 0 4px 20px rgba(10,28,66,0.1); border-color: #1B6EC2; }
+.action-title { font-weight: 700; color: #0A1C42; margin-bottom: 12px; font-size: 13px; }
+.action-list { list-style: none; }
+.action-list li { font-size: 12px; color: #6a7a8a; padding: 8px 0; border-bottom: 1px solid #eef0f5; }
+.action-list li:last-child { border-bottom: none; }
+.action-badge { background: rgba(27, 110, 194, 0.1); color: #1B6EC2; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-left: 8px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+.dash-card {
+  background: #fff; border-radius: 10px;
+  border: 1px solid #dde4ed; padding: 28px 28px 24px;
+  text-decoration: none; transition: box-shadow 0.18s, border-color 0.18s;
+  display: block; border-left: 4px solid #1B6EC2;
+}
+.dash-card:hover { box-shadow: 0 4px 20px rgba(10,28,66,0.1); border-color: #1B6EC2; }
+.dash-card-label {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: #1B6EC2; font-weight: 700; margin-bottom: 10px;
+}
+.dash-card-title { font-size: 18px; font-weight: 700; color: #0A1C42; margin-bottom: 8px; }
+.dash-card-body { font-size: 13px; color: #6a7a8a; line-height: 1.6; }
+.dash-card-count {
+  margin-top: 16px; font-size: 28px; font-weight: 700; color: #0A1C42;
+}
+.dash-card-count span { font-size: 13px; font-weight: 400; color: #9aaabb; margin-left: 4px; }
+
+@media (max-width: 560px) {
+  .nav { padding: 0 16px; }
+  .dashboard { padding: 28px 16px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div style="display:flex;align-items:center;">
+    <a href="/internal/" class="nav-brand">BW Advisory Solutions</a>
+    <span class="nav-tag">Internal</span>
+  </div>
+  <div class="nav-right" id="nav-links" style="display:none;">
+    <a href="/internal/intakes.html" class="nav-link">Intakes</a>
+    <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
+    <a href="/internal/clients.html" class="nav-link">Clients</a>
+    <a href="/internal/documents.html" class="nav-link">Documents</a>
+    <a href="/internal/invoices.html" class="nav-link">Invoices</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<!-- Login gate -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-header">
+      <div class="gate-title">Internal Dashboard</div>
+      <div class="gate-sub">BW Advisory Solutions — restricted access</div>
+    </div>
+    <div class="gate-body">
+      <div class="field" id="f-key">
+        <label for="api-key">API key</label>
+        <input type="password" id="api-key" placeholder="Enter your access key" autocomplete="current-password">
+        <div class="field-err" id="key-err">Invalid key. Please try again.</div>
+      </div>
+      <button class="btn-login" id="btn-login" onclick="login()">Access Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub">Good to see you, Brad. Here's your current pipeline.</div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Revenue YTD</div>
+      <div class="kpi-value" id="kpi-revenue">—</div>
+      <div class="kpi-subtext">Year to date</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Outstanding</div>
+      <div class="kpi-value" id="kpi-outstanding">—</div>
+      <div class="kpi-subtext">Pending invoices</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Pending Approvals</div>
+      <div class="kpi-value" id="kpi-pending">—</div>
+      <div class="kpi-subtext">Diagnostics</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Active Clients</div>
+      <div class="kpi-value" id="kpi-clients">—</div>
+      <div class="kpi-subtext">Current portfolio</div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Pipeline</div>
+      <button class="btn-refresh" onclick="loadCounts()">↻ Refresh</button>
+    </div>
+    <div class="pipeline" id="pipeline-container">
+      <div style="text-align: center; color: #9aaabb; width: 100%;">Loading pipeline...</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section">
+    <div class="section-title" style="margin-bottom: 24px;">Quick Actions</div>
+    <div class="quick-actions">
+      <div class="action-card" onclick="window.location.href='/internal/diagnostics.html'">
+        <div class="action-title">Pending Approvals</div>
+        <ul class="action-list" id="pending-list">
+          <li style="color: #9aaabb;">Loading...</li>
+        </ul>
+      </div>
+      <div class="action-card" onclick="window.location.href='/internal/invoices.html'">
+        <div class="action-title">Outstanding Invoices</div>
+        <ul class="action-list" id="outstanding-list">
+          <li style="color: #9aaabb;">Loading...</li>
+        </ul>
+      </div>
+      <div class="action-card" onclick="window.location.href='/internal/diagnostics.html'">
+        <div class="action-title">Recently Sent</div>
+        <ul class="action-list" id="recent-list">
+          <li style="color: #9aaabb;">Loading...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Cards -->
+  <div style="margin-top: 40px;">
+    <div class="section-title" style="margin-bottom: 24px;">Navigation</div>
+    <div class="cards">
+      <a href="/internal/intakes.html" class="dash-card">
+        <div class="dash-card-label">Discovery Calls</div>
+        <div class="dash-card-title">Intake Queue</div>
+        <div class="dash-card-body">Prospects who have requested a discovery call — pending research and outreach.</div>
+        <div class="dash-card-count" id="count-intakes">— <span>pending</span></div>
+      </a>
+      <a href="/internal/documents.html" class="dash-card">
+        <div class="dash-card-label">Documents</div>
+        <div class="dash-card-title">Delivered Files</div>
+        <div class="dash-card-body">Documents uploaded and sent to clients — with download and preview tracking.</div>
+        <div class="dash-card-count" id="count-docs">— <span>documents</span></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+const DASH_API = '/.netlify/functions/portal-dashboard-api';
+
+function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
+
+async function login() {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { setErr(true, 'Please enter your access key.'); return; }
+
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true;
+  btn.textContent = 'Verifying…';
+
+  try {
+    const res = await fetch(`${API}?action=ping`, {
+      headers: { 'x-portal-api-key': key }
+    });
+    if (res.status === 401) { setErr(true, 'Invalid key. Please try again.'); return; }
+    if (!res.ok) throw new Error('Server error');
+
+    sessionStorage.setItem('brad_api_key', key);
+    showDashboard();
+  } catch (e) {
+    setErr(true, 'Could not connect to server. Try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Access Dashboard';
+  }
+}
+
+function setErr(show, msg) {
+  document.getElementById('f-key').classList.toggle('has-error', show);
+  if (msg) document.getElementById('key-err').textContent = msg;
+}
+
+function signOut() {
+  sessionStorage.removeItem('brad_api_key');
+  location.reload();
+}
+
+async function showDashboard() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('nav-links').style.display = 'flex';
+  loadCounts();
+}
+
+async function loadCounts() {
+  const key = getKey();
+  const headers = { 'x-portal-api-key': key };
+
+  // Load KPIs
+  try {
+    const kpiRes = await fetch(`${DASH_API}?action=get-dashboard-kpis`, { headers });
+    const kpiData = await kpiRes.json();
+    if (kpiData.ok) {
+      document.getElementById('kpi-revenue').textContent = kpiData.kpis.revenueYTDFormatted;
+      document.getElementById('kpi-outstanding').textContent = kpiData.kpis.outstandingFormatted;
+      document.getElementById('kpi-pending').textContent = kpiData.kpis.pendingDiagnostics;
+      document.getElementById('kpi-clients').textContent = kpiData.kpis.activeClients;
+    }
+  } catch (e) { console.error('KPI load failed:', e); }
+
+  // Load Pipeline
+  try {
+    const pipeRes = await fetch(`${DASH_API}?action=get-pipeline-view`, { headers });
+    const pipeData = await pipeRes.json();
+    if (pipeData.ok) renderPipeline(pipeData.pipeline);
+  } catch (e) { console.error('Pipeline load failed:', e); }
+
+  // Load Diagnostics and Invoices
+  const [diagRes, invRes, intakeRes, docRes] = await Promise.allSettled([
+    fetch(`${API}?action=get-diagnostics`, { headers }).then(r => r.json()),
+    fetch(`${API}?action=get-invoices`, { headers }).then(r => r.json()),
+    fetch(`${API}?action=get-intakes`, { headers }).then(r => r.json()),
+    fetch(`${API}?action=get-documents`, { headers }).then(r => r.json()),
+  ]);
+
+  // Pending diagnostics
+  if (diagRes.status === 'fulfilled' && diagRes.value.ok) {
+    const pending = diagRes.value.diagnostics.filter(d => d.status === 'pending').slice(0, 3);
+    const html = pending.length > 0
+      ? pending.map(d => `<li>${d.prospect?.name || 'Unknown'} <span class="action-badge">${d.diagType}</span></li>`).join('')
+      : '<li style="color: #9aaabb;">All caught up</li>';
+    document.getElementById('pending-list').innerHTML = html;
+  }
+
+  // Outstanding invoices
+  if (invRes.status === 'fulfilled' && invRes.value.ok) {
+    const outstanding = invRes.value.invoices.filter(i => i.status === 'pending' || i.status === 'overdue').slice(0, 3);
+    const html = outstanding.length > 0
+      ? outstanding.map(i => `<li>${i.num} — $${(i.total / 1000).toFixed(1)}k <span class="action-badge">${i.status}</span></li>`).join('')
+      : '<li style="color: #9aaabb;">All paid up</li>';
+    document.getElementById('outstanding-list').innerHTML = html;
+  }
+
+  // Recently sent diagnostics
+  if (diagRes.status === 'fulfilled' && diagRes.value.ok) {
+    const sent = diagRes.value.diagnostics.filter(d => d.status === 'sent').sort((a,b) => new Date(b.sentAt) - new Date(a.sentAt)).slice(0, 3);
+    const html = sent.length > 0
+      ? sent.map(d => `<li>${d.prospect?.name || 'Unknown'} <span class="action-badge">Sent</span></li>`).join('')
+      : '<li style="color: #9aaabb;">None sent yet</li>';
+    document.getElementById('recent-list').innerHTML = html;
+  }
+
+  // Navigation counts
+  if (intakeRes.status === 'fulfilled' && intakeRes.value.ok) {
+    const pending = intakeRes.value.intakes.filter(i => i.status === 'pending').length;
+    document.getElementById('count-intakes').innerHTML = `${pending} <span>pending</span>`;
+  }
+
+  if (docRes.status === 'fulfilled' && docRes.value.ok) {
+    const total = docRes.value.documents.length;
+    document.getElementById('count-docs').innerHTML = `${total} <span>documents</span>`;
+  }
+}
+
+function renderPipeline(pipeline) {
+  const stages = [
+    { label: 'Intakes', count: pipeline.intakeTotal },
+    { label: 'Diagnostics', count: pipeline.diagnosticsSubmitted },
+    { label: 'Clients', count: pipeline.clientsActive },
+    { label: 'Invoices', count: pipeline.invoicesIssued },
+  ];
+
+  const maxCount = Math.max(...stages.map(s => s.count), 1);
+  const html = stages.map(stage => {
+    const height = maxCount > 0 ? (stage.count / maxCount) * 100 : 10;
+    return `
+      <div class="pipeline-stage">
+        <div class="pipeline-bar" style="height: ${Math.max(height, 30)}px;">
+          <div class="pipeline-count">${stage.count}</div>
+        </div>
+        <div class="pipeline-label">${stage.label}</div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('pipeline-container').innerHTML = html;
+}
+
+// Auto-login if key already in session
+document.getElementById('api-key').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+if (getKey()) {
+  // Validate stored key silently
+  fetch(`${API}?action=ping`, { headers: { 'x-portal-api-key': getKey() } })
+    .then(r => { if (r.ok) showDashboard(); })
+    .catch(() => {});
+}
+</script>
+</body>
+</html>
