@@ -15,7 +15,6 @@
   from = "/"
   to = "https://bwadvisorysolutions.com.au/diagnostics"
   status = 301
-  force = true
 
 # Security headers for all portal pages
 [[headers]]
