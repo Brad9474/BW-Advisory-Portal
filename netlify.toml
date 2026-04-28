@@ -10,8 +10,8 @@
 
 # Serve Netlify functions without redirect
 [[redirects]]
-  from = "/.netlify/*"
-  to = "/.netlify/:splat"
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
   status = 200
 
 # Redirect portal root to main website diagnostics hub
