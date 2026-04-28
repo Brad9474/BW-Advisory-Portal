@@ -8,12 +8,6 @@
   to = "/public/:splat"
   status = 200
 
-# Serve Netlify functions without redirect
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
 # Redirect portal root to main website diagnostics hub
 # External users discover diagnostics on the website, not the portal
 [[redirects]]
