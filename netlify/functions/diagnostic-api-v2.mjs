@@ -336,7 +336,7 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
   <!-- Header with Logo -->
   <tr>
     <td style="background:#0A1C42;padding:36px 48px 28px;text-align:center;">
-      <div style="margin-bottom:16px;"><img src="https://bwadvisorysolutions.com.au/logo.png" alt="BW Advisory Solutions" style="max-width:140px;height:auto;"></div>
+      <div style="margin-bottom:16px;"><img src="/logo.png" alt="BW Advisory Solutions" style="max-width:140px;height:auto;"></div>
       <div style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:0.5px;">BW Advisory Solutions</div>
       <div style="color:#EBF3FA;font-size:12px;margin-top:4px;letter-spacing:0.5px;">bwadvisorysolutions.com.au</div>
     </td>
