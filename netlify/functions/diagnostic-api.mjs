@@ -140,11 +140,13 @@ export default async (req, context) => {
 
     const id = `diag_${Date.now()}`;
     const token = randomUUID();
+    const viewToken = randomUUID();
 
     // Store submission immediately as pending so the record exists before we return
     const submission = {
       id,
       token,
+      viewToken,
       diagType,
       submittedAt: new Date().toISOString(),
       status: 'pending',
@@ -483,14 +485,47 @@ function getTransporter() {
 }
 
 async function sendProspectEmail(submission) {
-  const { prospect, report } = submission;
+  const { prospect, report, id, viewToken } = submission;
   const transporter = getTransporter();
+  const portalOrigin = process.env.PORTAL_ORIGIN || 'https://portal.bwadvisorysolutions.com.au';
+  const reportUrl = `${portalOrigin}/.netlify/functions/diagnostic-report-viewer?id=${encodeURIComponent(id)}&token=${encodeURIComponent(viewToken)}`;
+
+  const emailHtml = `<!DOCTYPE html>
+<html><body style="font-family:Calibri,'Segoe UI',Arial,sans-serif;color:#1a1a2e;max-width:640px;margin:0 auto;background:#f5f7fa;padding:24px;">
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+  <tr><td style="background:#0A1C42;padding:36px 32px;text-align:center;">
+    <div style="color:#fff;font-size:18px;font-weight:700;margin-bottom:8px;">Your Diagnostic Assessment</div>
+    <div style="color:rgba(255,255,255,0.7);font-size:13px;">Prepared by BW Advisory Solutions</div>
+  </td></tr>
+
+  <tr><td style="padding:40px 32px;text-align:center;">
+    <div style="color:#0A1C42;font-size:16px;font-weight:600;margin-bottom:24px;">Hello ${escapeHtml(prospect.name)},</div>
+    <p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 24px 0;">Your diagnostic assessment has been completed and is ready to review. Access your personalised report below.</p>
+
+    <a href="${reportUrl}" style="display:inline-block;background:#1B6EC2;color:#fff;padding:14px 32px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;margin:20px 0;">View Your Report</a>
+
+    <p style="color:#999;font-size:12px;margin-top:20px;line-height:1.5;">If the button above doesn't work, copy and paste this link:<br><span style="color:#666;word-break:break-all;">${reportUrl}</span></p>
+  </td></tr>
+
+  <tr><td style="background:#f9fbfd;padding:20px 32px;border-top:1px solid #eef0f5;text-align:center;">
+    <div style="color:#666;font-size:11px;line-height:1.6;">
+      BW Advisory Solutions · brad@bwadvisorysolutions.com.au · +61 407 779 474<br>
+      <a href="https://bwadvisorysolutions.com.au" style="color:#1B6EC2;text-decoration:none;">bwadvisorysolutions.com.au</a>
+    </div>
+  </td></tr>
+
+</table>
+
+</body></html>`;
+
   await transporter.sendMail({
     from: `"BW Advisory Solutions" <${process.env.SMTP_USER}>`,
     to: prospect.email,
     bcc: HUBSPOT_BCC,
-    subject: `Your Strategic Diagnostic Assessment — ${prospect.organisation}`,
-    html: report.html,
+    subject: `Your Diagnostic Assessment — ${prospect.organisation}`,
+    html: emailHtml,
   });
 }
 
