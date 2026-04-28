@@ -31,7 +31,40 @@ export default async (req, context) => {
 
     // Extract report HTML from submission.report.html
     if (!submission.report || !submission.report.html) {
-      return new Response('Report not yet available', { status: 202 });
+      const waitingPage = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="refresh" content="3">
+<title>Report Loading — BW Advisory Solutions</title>
+<style>
+  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .card { background: #fff; max-width: 480px; padding: 48px; border-radius: 10px; text-align: center; box-shadow: 0 4px 24px rgba(10,28,66,0.1); }
+  .header { color: #0A1C42; font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+  .spinner { margin: 24px 0; }
+  .dot { width: 8px; height: 8px; background: #1B6EC2; border-radius: 50%; display: inline-block; margin: 0 4px; animation: pulse 1.5s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  .message { color: #666; font-size: 15px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">Report Loading</div>
+  <div class="spinner"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  <div class="message">Your diagnostic report is being generated. This page will refresh automatically.</div>
+</div>
+</body>
+</html>`;
+      return new Response(waitingPage, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      });
     }
 
     // Inject tracking pixel into report HTML
