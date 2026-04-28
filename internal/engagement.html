@@ -538,7 +538,6 @@ function renderList() {
     const clicks = eng?.metrics?.clicks || 0;
     const timeMin = Math.round((eng?.metrics?.timeOnPageSeconds || 0) / 60);
     const timeStr = timeMin > 0 ? `${timeMin} min` : 'N/A';
-    const badge = getBadge(diag.diagType);
 
     return `
       <div class="diag-row" id="row-${diag.id}" onclick="toggleExpand('${diag.id}')">
