@@ -128,23 +128,23 @@ export default async (req, context) => {
       clickedURL: redirectURL
     };
 
-    // Store event in Blobs if reportId provided
+    // Store event in submission (key format is sub_${id})
     if (reportId) {
       const store = getStore('diagnostics');
       try {
-        const report = await store.get(reportId, { type: 'json' });
+        const submission = await store.get(`sub_${reportId}`, { type: 'json' });
 
-        if (report) {
+        if (submission) {
           // Initialize events array if it doesn't exist
-          if (!report.events) {
-            report.events = [];
+          if (!submission.events) {
+            submission.events = [];
           }
 
           // Add event
-          report.events.push(event);
+          submission.events.push(event);
 
-          // Update report in Blobs
-          await store.set(reportId, report, { type: 'json' });
+          // Update submission in Blobs
+          await store.setJSON(`sub_${reportId}`, submission);
         }
       } catch (blobError) {
         console.warn('Could not log CTA click event:', blobError);

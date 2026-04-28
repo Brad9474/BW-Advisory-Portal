@@ -16,17 +16,22 @@ export default async (req, context) => {
       return new Response('Missing report ID or token', { status: 400 });
     }
 
-    // Retrieve report from Blobs
+    // Retrieve submission from Blobs (key format is sub_${id})
     const store = getStore('diagnostics');
-    const report = await store.get(reportId, { type: 'json' });
+    const submission = await store.get(`sub_${reportId}`, { type: 'json' });
 
-    if (!report) {
+    if (!submission) {
       return new Response('Report not found', { status: 404 });
     }
 
     // Validate token matches
-    if (report.viewToken !== viewToken) {
+    if (submission.viewToken !== viewToken) {
       return new Response('Invalid token', { status: 403 });
+    }
+
+    // Extract report HTML from submission.report.html
+    if (!submission.report || !submission.report.html) {
+      return new Response('Report not yet available', { status: 202 });
     }
 
     // Inject tracking pixel into report HTML
@@ -34,7 +39,7 @@ export default async (req, context) => {
     const trackingPixel = `<img src="${trackingPixelUrl}" width="1" height="1" alt="" style="display:none;">`;
 
     // Insert pixel before closing body tag
-    let htmlWithPixel = report.reportHTML.replace(
+    let htmlWithPixel = submission.report.html.replace(
       '</body>',
       `${trackingPixel}\n</body>`
     );
