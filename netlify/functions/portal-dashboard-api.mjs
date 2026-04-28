@@ -164,7 +164,7 @@ export default async (req) => {
       if (!reportId) return jsonResponse({ error: 'Missing reportId' }, 400);
 
       try {
-        const report = await diagStore.get(reportId, { type: 'json' });
+        const report = await diagStore.get(`sub_${reportId}`, { type: 'json' });
         if (!report) return jsonResponse({ error: 'Report not found' }, 404);
 
         const events = report.events || [];
