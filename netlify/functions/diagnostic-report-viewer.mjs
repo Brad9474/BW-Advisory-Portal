@@ -68,7 +68,8 @@ export default async (req, context) => {
     }
 
     // Inject tracking pixel into report HTML
-    const trackingPixelUrl = `/.netlify/functions/track-diagnostic-open?id=${reportId}`;
+    const baseUrl = new URL(req.url).origin;
+    const trackingPixelUrl = `${baseUrl}/.netlify/functions/track-diagnostic-open?id=${encodeURIComponent(reportId)}`;
     const trackingPixel = `<img src="${trackingPixelUrl}" width="1" height="1" alt="" style="display:none;">`;
 
     // Insert pixel before closing body tag
@@ -78,13 +79,13 @@ export default async (req, context) => {
     );
 
     // Also inject tracking into CTA links
-    // Replace href="/visit-bw" with tracked version
+    // Replace href="..." with tracked version
     htmlWithPixel = htmlWithPixel.replace(
       /href="(https?:\/\/[^"]+)"/g,
       (match, url) => {
         // Don't track internal links
         if (url.includes('bwadvisorysolutions.com') || url.includes('localhost')) {
-          const trackingUrl = `/.netlify/functions/track-diagnostic-cta?id=${reportId}&redirect=${encodeURIComponent(url)}`;
+          const trackingUrl = `${baseUrl}/.netlify/functions/track-diagnostic-cta?id=${encodeURIComponent(reportId)}&redirect=${encodeURIComponent(url)}`;
           return `href="${trackingUrl}"`;
         }
         return match;
