@@ -49,11 +49,8 @@ export default async (req, context) => {
     const token = reqUrl.searchParams.get('token');
     const apiKey = req.headers.get('x-portal-api-key');
 
-    // Validate API key for approve/reject
-    if (!process.env.PORTAL_API_KEY || apiKey !== process.env.PORTAL_API_KEY) {
-      return jsonResponse({ error: 'Unauthorized' }, 401);
-    }
-
+    // Token is the authentication mechanism (unique per submission)
+    // API key is optional for programmatic access
     if (!action || !token) {
       return htmlResponse(brandedPage('Invalid Request', '<p>Missing required parameters.</p>'), 400);
     }
