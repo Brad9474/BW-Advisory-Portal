@@ -72,11 +72,17 @@ export default async (req, context) => {
     const trackingPixelUrl = `${baseUrl}/.netlify/functions/track-diagnostic-open?id=${encodeURIComponent(reportId)}`;
     const trackingPixel = `<img src="${trackingPixelUrl}" width="1" height="1" alt="" style="display:none;">`;
 
-    // Insert pixel before closing body tag
-    let htmlWithPixel = submission.report.html.replace(
-      '</body>',
-      `${trackingPixel}\n</body>`
-    );
+    // Insert pixel before closing body tag (case-insensitive, with fallback)
+    let htmlWithPixel = submission.report.html;
+    if (htmlWithPixel.includes('</body>') || htmlWithPixel.includes('</BODY>')) {
+      htmlWithPixel = htmlWithPixel.replace(
+        /<\/body>/i,
+        `${trackingPixel}\n</body>`
+      );
+    } else {
+      // Fallback: append pixel at the end if no body tag found
+      htmlWithPixel = htmlWithPixel + trackingPixel;
+    }
 
     // Also inject tracking into CTA links
     // Replace href="..." with tracked version
