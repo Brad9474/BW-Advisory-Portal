@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engagement Analytics — BW Advisory Solutions</title>
+<link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<!-- Leaflet Map Library -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Leaflet Heat -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  background: #f5f7fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Nav ── */
+.nav {
+  background: #0F172A;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.nav-tag {
+  background: rgba(201,168,76,0.15);
+  color: #C9A84C;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-left: 12px;
+}
+.nav-links { display: flex; align-items: center; gap: 16px; }
+.nav-link { color: #C0C8D0; font-size: 13px; text-decoration: none; opacity: 0.75; transition: opacity 0.15s; }
+.nav-link:hover, .nav-link.active { opacity: 1; color: #C9A84C; }
+.nav-link.active { font-weight: 600; }
+.btn-signout { background: none; border: 1px solid rgba(255,255,255,0.2); color: #C0C8D0; font-size: 12px; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.btn-signout:hover { background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.3); color: #C9A84C; }
+
+/* ── Login gate ── */
+.gate { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.gate-card { background: #fff; border-radius: 12px; box-shadow: 0 6px 32px rgba(15,23,42,0.1); width: 100%; max-width: 400px; overflow: hidden; }
+.gate-header { background: #0F172A; padding: 24px 32px; }
+.gate-title { color: #fff; font-size: 17px; font-weight: 700; }
+.gate-sub { color: #C0C8D0; font-size: 12px; margin-top: 4px; }
+.gate-body { padding: 28px 32px; }
+.field { margin-bottom: 20px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: #0F172A; margin-bottom: 7px; }
+.field input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid #e5ddd6; border-radius: 7px;
+  font-size: 15px; font-family: inherit; color: #0F172A;
+  background: #faf9f7; transition: border-color 0.18s;
+}
+.field input:focus { outline: none; border-color: #C9A84C; background: #fff; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+.field.has-error input { border-color: #ef4444; }
+.field-err { font-size: 12px; color: #ef4444; margin-top: 5px; display: none; }
+.field.has-error .field-err { display: block; }
+.btn-login {
+  width: 100%; background: #C9A84C; color: #0F172A;
+  border: none; border-radius: 7px; padding: 13px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: background 0.15s;
+}
+.btn-login:hover { background: #E0BC60; }
+.btn-login:disabled { background: rgba(201,168,76,0.4); cursor: not-allowed; color: rgba(15,23,42,0.5); }
+
+/* ── Dashboard ── */
+.dashboard { flex: 1; padding: 40px 48px; display: none; }
+.page-title { font-size: 24px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: #666; margin-bottom: 32px; }
+
+/* ── Summary Strip ── */
+.metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 40px; }
+.metric-card {
+  background: #fff; border-radius: 10px;
+  border: 1px solid #e5ddd6; padding: 20px;
+  transition: box-shadow 0.18s;
+}
+.metric-card:hover { box-shadow: 0 4px 20px rgba(15,23,42,0.08); }
+.metric-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #999; font-weight: 700; margin-bottom: 8px; }
+.metric-value { font-size: 36px; font-weight: 700; color: #0F172A; margin-bottom: 2px; }
+.metric-subtext { font-size: 12px; color: #999; }
+
+/* ── Filter Bar ── */
+.filter-bar { margin-bottom: 28px; background: #fff; border-radius: 10px; border: 1px solid #e5ddd6; padding: 16px 20px; }
+.filter-section { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-section:last-child { margin-bottom: 0; }
+.filter-label { font-size: 12px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; min-width: 60px; }
+.filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill {
+  background: #f9f8f6; color: #666; border: 1px solid #e5ddd6;
+  padding: 7px 14px; border-radius: 20px; font-size: 13px; cursor: pointer;
+  font-weight: 600; transition: all 0.15s;
+}
+.pill:hover { border-color: #C9A84C; color: #C9A84C; }
+.pill.active { background: #C9A84C; color: #fff; border-color: #C9A84C; }
+.sort-select { padding: 7px 12px; border: 1px solid #e5ddd6; border-radius: 6px; font-family: inherit; font-size: 13px; cursor: pointer; background: #fff; color: #0F172A; }
+
+/* ── Diagnostics Table ── */
+.diag-list { display: flex; flex-direction: column; gap: 8px; }
+.diag-row {
+  background: #fff; border-radius: 10px; border: 1px solid #e5ddd6;
+  transition: all 0.18s; overflow: hidden;
+}
+.diag-row:hover { box-shadow: 0 4px 20px rgba(15,23,42,0.08); }
+.diag-header {
+  padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none;
+}
+.diag-left { flex: 1; display: flex; align-items: center; gap: 16px; }
+.diag-prospect { flex: 1; }
+.diag-name { font-size: 15px; font-weight: 700; color: #0F172A; }
+.diag-org { font-size: 13px; color: #999; margin-top: 1px; }
+.diag-right { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+.diag-metric { text-align: right; }
+.diag-metric-val { font-size: 16px; font-weight: 700; color: #0F172A; }
+.diag-metric-lbl { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; margin-right: 8px; }
+.badge-strategic { background: rgba(201,168,76,0.1); color: #C9A84C; }
+.badge-operational { background: #f0ebfa; color: #6b3fa8; }
+.badge-investigations { background: #ffe8e8; color: #a8341a; }
+.badge-loss-intelligence { background: #e8f5e9; color: #2e7d32; }
+.badge-sent { background: #e8f5e9; color: #2e7d32; }
+.badge-pending { background: #fff7e6; color: #b7620a; }
+.chevron { font-size: 14px; color: #999; transition: transform 0.2s; }
+.diag-row.expanded .chevron { transform: rotate(180deg); }
+
+.diag-body { display: none; padding: 0; border-top: 1px solid #f5f3f0; }
+.diag-row.expanded .diag-body { display: block; }
+
+/* ── Drill-down Content ── */
+.drill-down-wrapper { padding: 24px; }
+.drill-down-headline {
+  background: rgba(201,168,76,0.08); border-left: 4px solid #C9A84C;
+  padding: 16px; border-radius: 6px;
+  font-size: 15px; font-weight: 600; color: #0F172A; line-height: 1.5;
+  margin-bottom: 20px;
+}
+.drill-down-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.drill-metric-card {
+  background: rgba(201,168,76,0.08); border-radius: 8px; padding: 14px; text-align: center;
+}
+.drill-metric-val { font-size: 24px; font-weight: 700; color: #C9A84C; }
+.drill-metric-lbl { font-size: 11px; color: #0F172A; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.charts-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 24px; }
+.chart-box { background: #faf9f7; border-radius: 8px; border: 1px solid #e5ddd6; padding: 16px; }
+.chart-title { font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 12px; }
+.chart-svg { max-width: 100%; }
+
+.countries-bars { margin-bottom: 24px; }
+.bar-item { margin-bottom: 12px; }
+.bar-label { font-size: 12px; color: #444; margin-bottom: 4px; display: flex; justify-content: space-between; }
+.bar-val { font-weight: 700; color: #C9A84C; }
+.bar-container { background: #e5ddd6; border-radius: 4px; overflow: hidden; height: 22px; }
+.bar-fill { background: linear-gradient(90deg, #C9A84C, #E0BC60); height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; color: #fff; font-weight: 700; }
+
+.event-timeline { border-left: 2px solid #C9A84C; padding-left: 16px; }
+.event-item { margin-bottom: 16px; position: relative; }
+.event-item::before { content: ''; position: absolute; left: -10px; top: 2px; width: 8px; height: 8px; background: #C9A84C; border-radius: 50%; border: 2px solid #fff; }
+.event-time { font-size: 12px; font-weight: 700; color: #0F172A; }
+.event-meta { font-size: 11px; color: #999; margin-top: 2px; }
+
+.timeline-section-title { font-size: 13px; font-weight: 700; color: #0F172A; margin-top: 24px; margin-bottom: 12px; }
+
+/* ── Geographic Map ── */
+.map-section { margin-top: 40px; padding: 24px; background: #fff; border-radius: 10px; border: 1px solid #e5ddd6; }
+#engagement-map { width: 100%; height: 400px; border-radius: 8px; border: 1px solid #e5ddd6; }
+.map-legend { margin-top: 16px; padding: 12px; background: #faf9f7; border-radius: 6px; font-size: 12px; }
+.map-legend-item { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.map-legend-color { width: 20px; height: 20px; border-radius: 50%; }
+.location-popup { font-size: 12px; }
+.location-popup strong { color: #C9A84C; }
+
+/* ── Themes Section ── */
+.themes-section { margin-top: 40px; padding: 24px; background: #fff; border-radius: 10px; border: 1px solid #e5ddd6; }
+.section-title { font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+.theme-item { margin-bottom: 16px; }
+.theme-label { font-size: 13px; color: #0F172A; font-weight: 600; margin-bottom: 6px; display: flex; justify-content: space-between; }
+.theme-count { font-size: 12px; color: #C9A84C; font-weight: 700; }
+.theme-bar { background: #e5ddd6; border-radius: 4px; height: 8px; overflow: hidden; }
+.theme-fill { background: linear-gradient(90deg, #C9A84C, #E0BC60); height: 100%; }
+
+/* ── Loading ── */
+.skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
+.loading-row { margin-bottom: 12px; }
+.loading-row .diag-header { padding: 18px 24px; }
+.loading-line { height: 16px; width: 100%; margin-bottom: 8px; }
+.loading-line.short { width: 60%; }
+
+@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+@media (max-width: 768px) {
+  .dashboard { padding: 24px 16px; }
+  .nav { padding: 0 16px; }
+  .nav-links { gap: 8px; }
+  .diag-right { flex-direction: column; gap: 8px; }
+  .filter-section { flex-direction: column; align-items: flex-start; }
+  .charts-row { grid-template-columns: 1fr; }
+  .metrics-row { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div style="display:flex;align-items:center;">
+    <a href="/internal/" class="nav-brand">BW Advisory Solutions</a>
+    <span class="nav-tag">Internal</span>
+  </div>
+  <div class="nav-links" id="nav-links" style="display:none;">
+    <a href="/internal/" class="nav-link">Dashboard</a>
+    <a href="/internal/intakes.html" class="nav-link">Intakes</a>
+    <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
+    <a href="/internal/engagement.html" class="nav-link active">Engagement</a>
+    <a href="/internal/clients.html" class="nav-link">Clients</a>
+    <a href="/internal/documents.html" class="nav-link">Documents</a>
+    <a href="/internal/invoices.html" class="nav-link">Invoices</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<!-- Login gate -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-header">
+      <div class="gate-title">Engagement Analytics</div>
+      <div class="gate-sub">BW Advisory Solutions — restricted access</div>
+    </div>
+    <div class="gate-body">
+      <div class="field" id="f-key">
+        <label for="api-key">API key</label>
+        <input type="password" id="api-key" placeholder="Enter your access key" autocomplete="current-password">
+        <div class="field-err" id="key-err">Invalid key. Please try again.</div>
+      </div>
+      <button class="btn-login" id="btn-login" onclick="login()">Access Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+  <div class="page-title">Engagement Analytics</div>
+  <div class="page-sub">Diagnostic outreach performance, prospect engagement, and response patterns.</div>
+
+  <!-- Metrics -->
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-label">Total Sent</div>
+      <div class="metric-value" id="metric-sent">—</div>
+      <div class="metric-subtext">Reports delivered</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Opens</div>
+      <div class="metric-value" id="metric-opens">—</div>
+      <div class="metric-subtext">Email opens tracked</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Engagement Rate</div>
+      <div class="metric-value" id="metric-rate">—</div>
+      <div class="metric-subtext">% of sent reports</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Clicks</div>
+      <div class="metric-value" id="metric-clicks">—</div>
+      <div class="metric-subtext">CTA clicks tracked</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-section">
+      <div class="filter-label">Type</div>
+      <div class="filter-pills">
+        <button class="pill active" data-type="all" onclick="setTypeFilter('all')">All</button>
+        <button class="pill" data-type="strategic" onclick="setTypeFilter('strategic')">Strategic</button>
+        <button class="pill" data-type="operational" onclick="setTypeFilter('operational')">Operational</button>
+        <button class="pill" data-type="investigations" onclick="setTypeFilter('investigations')">Investigations</button>
+        <button class="pill" data-type="loss-intelligence" onclick="setTypeFilter('loss-intelligence')">Loss Intelligence</button>
+      </div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-label">Period</div>
+      <div class="filter-pills">
+        <button class="pill active" data-period="all" onclick="setPeriodFilter('all')">All Time</button>
+        <button class="pill" data-period="7d" onclick="setPeriodFilter('7d')">Last 7 Days</button>
+        <button class="pill" data-period="30d" onclick="setPeriodFilter('30d')">Last 30 Days</button>
+      </div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-label">Sort</div>
+      <select class="sort-select" onchange="setSortOrder(this.value)">
+        <option value="recent">Most Recent</option>
+        <option value="opens">Most Opens</option>
+        <option value="clicks">Most Clicks</option>
+        <option value="name">Name (A–Z)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Diagnostics List -->
+  <div class="diag-list" id="diag-list">
+    <div class="loading-row">
+      <div style="display:flex;gap:16px;">
+        <div class="skeleton loading-line" style="flex:1;"></div>
+        <div class="skeleton loading-line short"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Geographic Engagement Map -->
+  <div class="map-section">
+    <div class="section-title">Geographic Reach</div>
+    <div id="engagement-map"></div>
+    <div class="map-legend">
+      <div style="margin-bottom: 8px; font-weight: 700; color: #0F172A;">Heat Map Legend</div>
+      <div class="map-legend-item">
+        <div class="map-legend-color" style="background: #fff9e6;"></div>
+        <span>Low activity (1-2 events)</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-color" style="background: #ffd700;"></div>
+        <span>Medium activity (3-5 events)</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-color" style="background: #ff8c00;"></div>
+        <span>High activity (6-10 events)</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-color" style="background: #ff4500;"></div>
+        <span>Very high activity (10+ events)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Themes -->
+  <div class="themes-section">
+    <div class="section-title">Top Themes</div>
+    <div id="themes-list">
+      <div class="loading-row">
+        <div class="skeleton loading-line"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = '/.netlify/functions/portal-api';
+const DASH_API = '/.netlify/functions/portal-dashboard-api';
+
+// State
+let allDiagnostics = [];
+let allEngagement = {};
+let activeType = 'all';
+let activePeriod = 'all';
+let activeSort = 'recent';
+
+function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
+
+async function login() {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { setErr(true, 'Please enter your access key.'); return; }
+
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true;
+  btn.textContent = 'Verifying…';
+
+  try {
+    const res = await fetch(`${API}?action=ping`, {
+      headers: { 'x-portal-api-key': key }
+    });
+    if (res.status === 401) { setErr(true, 'Invalid key. Please try again.'); return; }
+    if (!res.ok) throw new Error('Server error');
+
+    sessionStorage.setItem('brad_api_key', key);
+    showDashboard();
+  } catch (e) {
+    setErr(true, 'Could not connect to server. Try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Access Dashboard';
+  }
+}
+
+function setErr(show, msg) {
+  document.getElementById('f-key').classList.toggle('has-error', show);
+  if (msg) document.getElementById('key-err').textContent = msg;
+}
+
+function signOut() {
+  sessionStorage.removeItem('brad_api_key');
+  location.reload();
+}
+
+async function showDashboard() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('nav-links').style.display = 'flex';
+
+  // Initialize map
+  setTimeout(() => {
+    initMap();
+  }, 100);
+
+  loadData();
+}
+
+async function loadData() {
+  const key = getKey();
+  const headers = { 'x-portal-api-key': key };
+
+  try {
+    // Load all diagnostics
+    const diagRes = await fetch(`${API}?action=get-diagnostics`, { headers });
+    const diagData = await diagRes.json();
+    if (diagData.ok) {
+      allDiagnostics = (diagData.diagnostics || []).filter(d => d.status === 'sent');
+
+      // Load engagement for each diagnostic
+      for (const diag of allDiagnostics) {
+        try {
+          const engRes = await fetch(`${DASH_API}?action=get-diagnostic-engagement&reportId=${encodeURIComponent(diag.id)}`, { headers });
+          const engData = await engRes.json();
+          if (engData.ok) {
+            allEngagement[diag.id] = engData.engagement;
+          }
+        } catch (e) {
+          console.warn('Failed to load engagement for', diag.id, e);
+        }
+      }
+
+      renderList();
+      updateMetrics();
+
+      // Render map with engagement data
+      renderHeatMap(allDiagnostics, allEngagement);
+    }
+  } catch (e) {
+    console.error('Data load failed:', e);
+  }
+
+  // Load themes
+  try {
+    const themesRes = await fetch(`${DASH_API}?action=get-aggregated-themes`, { headers });
+    const themesData = await themesRes.json();
+    if (themesData.ok) {
+      renderThemes(themesData.themes.topThemes);
+    }
+  } catch (e) {
+    console.error('Themes load failed:', e);
+  }
+}
+
+function updateMetrics() {
+  const filtered = getFilteredDiagnostics();
+  const sent = filtered.length;
+
+  let totalOpens = 0;
+  let totalClicks = 0;
+  const haOpen = new Set();
+
+  filtered.forEach(diag => {
+    const eng = allEngagement[diag.id];
+    if (eng) {
+      const opens = eng.metrics?.opens || 0;
+      const clicks = eng.metrics?.clicks || 0;
+      totalOpens += opens;
+      totalClicks += clicks;
+      if (opens > 0) haOpen.add(diag.id);
+    }
+  });
+
+  const rate = sent > 0 ? Math.round((haOpen.size / sent) * 100) : 0;
+
+  document.getElementById('metric-sent').textContent = sent;
+  document.getElementById('metric-opens').textContent = totalOpens;
+  document.getElementById('metric-rate').textContent = rate + '%';
+  document.getElementById('metric-clicks').textContent = totalClicks;
+}
+
+function getFilteredDiagnostics() {
+  let filtered = allDiagnostics;
+
+  // Type filter
+  if (activeType !== 'all') {
+    filtered = filtered.filter(d => d.diagType === activeType);
+  }
+
+  // Period filter
+  if (activePeriod !== 'all') {
+    const now = new Date();
+    const cutoff = new Date();
+    if (activePeriod === '7d') cutoff.setDate(cutoff.getDate() - 7);
+    if (activePeriod === '30d') cutoff.setDate(cutoff.getDate() - 30);
+    filtered = filtered.filter(d => new Date(d.sentAt) >= cutoff);
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    const engA = allEngagement[a.id] || {};
+    const engB = allEngagement[b.id] || {};
+
+    switch (activeSort) {
+      case 'opens':
+        return (engB.metrics?.opens || 0) - (engA.metrics?.opens || 0);
+      case 'clicks':
+        return (engB.metrics?.clicks || 0) - (engA.metrics?.clicks || 0);
+      case 'name':
+        return (a.prospect?.name || '').localeCompare(b.prospect?.name || '');
+      case 'recent':
+      default:
+        return new Date(b.sentAt) - new Date(a.sentAt);
+    }
+  });
+
+  return filtered;
+}
+
+function renderList() {
+  const filtered = getFilteredDiagnostics();
+  const html = filtered.map(diag => {
+    const eng = allEngagement[diag.id];
+    const opens = eng?.metrics?.opens || 0;
+    const clicks = eng?.metrics?.clicks || 0;
+    const timeMin = Math.round((eng?.metrics?.timeOnPageSeconds || 0) / 60);
+    const timeStr = timeMin > 0 ? `${timeMin} min` : 'N/A';
+    const badge = getBadge(diag.diagType);
+
+    return `
+      <div class="diag-row" id="row-${diag.id}" onclick="toggleExpand('${diag.id}')">
+        <div class="diag-header">
+          <div class="diag-left">
+            <div class="diag-prospect">
+              <div class="diag-name">${escapeHtml(diag.prospect?.name || 'Unknown')}</div>
+              <div class="diag-org">${escapeHtml(diag.prospect?.organisation || 'N/A')} · ${escapeHtml(diag.prospect?.role || '')}</div>
+            </div>
+          </div>
+          <div class="diag-right">
+            <span class="badge badge-${diag.diagType}">${diag.diagType.replace(/-/g, ' ').toUpperCase()}</span>
+            <div class="diag-metric">
+              <div class="diag-metric-val">${new Date(diag.sentAt).toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'2-digit'})}</div>
+              <div class="diag-metric-lbl">Sent</div>
+            </div>
+            <div class="diag-metric">
+              <div class="diag-metric-val">${opens}</div>
+              <div class="diag-metric-lbl">👁 Opens</div>
+            </div>
+            <div class="diag-metric">
+              <div class="diag-metric-val">${clicks}</div>
+              <div class="diag-metric-lbl">⟶ Clicks</div>
+            </div>
+            <div class="diag-metric">
+              <div class="diag-metric-val">${timeStr}</div>
+              <div class="diag-metric-lbl">Time</div>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+        </div>
+        <div class="diag-body" id="body-${diag.id}"></div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('diag-list').innerHTML = html || '<div style="padding:20px;color:#9aaabb;text-align:center;">No diagnostics match your filters.</div>';
+}
+
+function toggleExpand(diagId) {
+  const row = document.getElementById(`row-${diagId}`);
+  const body = document.getElementById(`body-${diagId}`);
+
+  row.classList.toggle('expanded');
+
+  if (row.classList.contains('expanded') && body.innerHTML === '') {
+    loadDrillDown(diagId);
+  }
+}
+
+function loadDrillDown(diagId) {
+  const diag = allDiagnostics.find(d => d.id === diagId);
+  const eng = allEngagement[diagId] || {};
+
+  if (!eng.metrics) return;
+
+  const metrics = eng.metrics;
+  const devices = eng.devices || {};
+  const browsers = eng.browsers || {};
+  const countries = eng.countries || {};
+  const events = eng.events || [];
+
+  const sentDate = new Date(diag.sentAt).toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'});
+
+  let html = `
+    <div class="drill-down-wrapper">
+      <div class="drill-down-headline">
+        ${escapeHtml(diag.prospect?.name)} · ${escapeHtml(diag.prospect?.organisation)} · ${sentDate}
+      </div>
+
+      <div class="drill-down-metrics">
+        <div class="drill-metric-card">
+          <div class="drill-metric-val">${metrics.opens || 0}</div>
+          <div class="drill-metric-lbl">Opens</div>
+        </div>
+        <div class="drill-metric-card">
+          <div class="drill-metric-val">${metrics.clicks || 0}</div>
+          <div class="drill-metric-lbl">Clicks</div>
+        </div>
+        <div class="drill-metric-card">
+          <div class="drill-metric-val">${metrics.timeOnPageFormatted || 'N/A'}</div>
+          <div class="drill-metric-lbl">Time on Page</div>
+        </div>
+        <div class="drill-metric-card">
+          <div class="drill-metric-val">${metrics.uniqueCountries || 0}</div>
+          <div class="drill-metric-lbl">Countries</div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-box">
+          <div class="chart-title">Device Breakdown</div>
+          ${renderDonutChart(devices, 'device')}
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Browser Breakdown</div>
+          ${renderDonutChart(browsers, 'browser')}
+        </div>
+      </div>
+
+      ${Object.keys(countries).length > 0 ? `
+        <div class="countries-bars">
+          <div style="font-size:13px;font-weight:700;color:#0A1C42;margin-bottom:12px;">Geographic Reach</div>
+          ${renderCountryBars(countries)}
+        </div>
+      ` : ''}
+
+      ${events.length > 0 ? `
+        <div class="timeline-section-title">Activity Timeline</div>
+        <div class="event-timeline">
+          ${renderEventTimeline(events)}
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  document.getElementById(`body-${diagId}`).innerHTML = html;
+}
+
+function renderDonutChart(data, type) {
+  const entries = Object.entries(data || {});
+  if (entries.length === 0) return '<p style="color:#9aaabb;font-size:12px;">No data</p>';
+
+  const total = entries.reduce((sum, [, count]) => sum + count, 0);
+  if (total === 0) return '<p style="color:#9aaabb;font-size:12px;">No data</p>';
+
+  const colors = ['#C9A84C', '#E0BC60', '#D9A84C', '#B8944D', '#A8844F'];
+  const radius = 35;
+  const centerX = 50, centerY = 50;
+
+  let html = '<svg viewBox="0 0 120 120" class="chart-svg" style="max-height:140px;">';
+
+  let currentAngle = -90;
+  entries.forEach(([label, count], idx) => {
+    const pct = count / total;
+    const angle = pct * 360;
+    const startAngle = currentAngle * Math.PI / 180;
+    const endAngle = (currentAngle + angle) * Math.PI / 180;
+
+    const x1 = centerX + radius * Math.cos(startAngle);
+    const y1 = centerY + radius * Math.sin(startAngle);
+    const x2 = centerX + radius * Math.cos(endAngle);
+    const y2 = centerY + radius * Math.sin(endAngle);
+
+    const largeArc = angle > 180 ? 1 : 0;
+
+    html += `<path d="M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z" fill="${colors[idx % colors.length]}" stroke="#fff" stroke-width="1"/>`;
+
+    currentAngle += angle;
+  });
+
+  html += '</svg><div style="margin-top:8px;font-size:11px;">';
+  entries.forEach(([label, count], idx) => {
+    html += `<div style="margin-bottom:4px;"><span style="display:inline-block;width:8px;height:8px;background:${colors[idx % colors.length]};border-radius:2px;margin-right:6px;"></span>${escapeHtml(label || 'Unknown')}: ${count}</div>`;
+  });
+  html += '</div>';
+
+  return html;
+}
+
+function renderCountryBars(countries) {
+  const entries = Object.entries(countries || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const max = Math.max(...entries.map(e => e[1]), 1);
+
+  return entries.map(([country, count]) => {
+    const pct = (count / max) * 100;
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span>${escapeHtml(country || 'Unknown')}</span>
+          <span class="bar-val">${count}</span>
+        </div>
+        <div class="bar-container">
+          <div class="bar-fill" style="width:${pct}%">${pct > 20 ? count : ''}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderEventTimeline(events) {
+  return events.slice(-15).map(event => {
+    const time = new Date(event.timestamp).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit'});
+    const date = new Date(event.timestamp).toLocaleDateString('en-AU');
+    const type = event.type === 'email_open' ? '👁 Email Opened' : '⟶ Link Clicked';
+    const city = event.city ? `${event.city}, ` : '';
+    const org = event.org ? ` · ${escapeHtml(event.org)}` : '';
+    const meta = `${escapeHtml(event.browser || 'Unknown')} · ${escapeHtml(event.device || 'Unknown')} · ${city}${escapeHtml(event.country || 'Unknown')}${org}`;
+
+    return `
+      <div class="event-item">
+        <div class="event-time">${time} — ${date}</div>
+        <div class="event-meta">${type} · ${meta}</div>
+      </div>
+    `;
+  }).reverse().join('');
+}
+
+function renderThemes(themes) {
+  if (!themes || themes.length === 0) {
+    document.getElementById('themes-list').innerHTML = '<p style="color:#9aaabb;font-size:12px;">No themes identified yet.</p>';
+    return;
+  }
+
+  const max = Math.max(...themes.map(t => t.mentions), 1);
+
+  const html = themes.map(theme => {
+    const pct = (theme.mentions / max) * 100;
+    return `
+      <div class="theme-item">
+        <div class="theme-label">
+          <span>${escapeHtml(theme.theme)}</span>
+          <span class="theme-count">${theme.mentions}</span>
+        </div>
+        <div class="theme-bar">
+          <div class="theme-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('themes-list').innerHTML = html;
+}
+
+function setTypeFilter(type) {
+  activeType = type;
+  document.querySelectorAll('.filter-pills')[0].querySelectorAll('.pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.type === type);
+  });
+  renderList();
+  updateMetrics();
+  collapseAll();
+}
+
+function setPeriodFilter(period) {
+  activePeriod = period;
+  document.querySelectorAll('.filter-pills')[1].querySelectorAll('.pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.period === period);
+  });
+  renderList();
+  updateMetrics();
+  collapseAll();
+}
+
+function setSortOrder(order) {
+  activeSort = order;
+  renderList();
+  collapseAll();
+}
+
+function collapseAll() {
+  document.querySelectorAll('.diag-row.expanded').forEach(row => {
+    row.classList.remove('expanded');
+  });
+}
+
+function escapeHtml(text) {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Initialize and render map
+let engagementMap = null;
+let heatLayer = null;
+
+function initMap() {
+  // Create map centered on Australia
+  engagementMap = L.map('engagement-map').setView([-25.2744, 133.7751], 4);
+
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(engagementMap);
+}
+
+function renderHeatMap(allDiagnostics, allEngagement) {
+  if (!engagementMap) return;
+
+  // Remove existing heat layer
+  if (heatLayer) engagementMap.removeLayer(heatLayer);
+
+  // Collect all location data points from events
+  const heatPoints = [];
+
+  allDiagnostics.forEach(diag => {
+    const eng = allEngagement[diag.id];
+    if (eng && eng.events) {
+      eng.events.forEach(event => {
+        if (event.lat && event.lon) {
+          // Format: [lat, lon, intensity]
+          // Intensity based on event type (clicks weighted higher than opens)
+          const intensity = event.type === 'cta_click' ? 0.8 : 0.5;
+          heatPoints.push([event.lat, event.lon, intensity]);
+        }
+      });
+    }
+  });
+
+  // Create and add heat layer
+  if (heatPoints.length > 0) {
+    heatLayer = L.heatLayer(heatPoints, {
+      radius: 40,
+      blur: 25,
+      maxZoom: 1,
+      gradient: {
+        0.0: '#fff9e6',
+        0.25: '#ffd700',
+        0.5: '#ff8c00',
+        0.75: '#ff4500',
+        1.0: '#c41e3a'
+      }
+    }).addTo(engagementMap);
+
+    // Add location markers with organization info
+    const locationGroups = {};
+    heatPoints.forEach(([lat, lon], idx) => {
+      const event = findEventByCoords(lat, lon, allDiagnostics, allEngagement);
+      if (event) {
+        const key = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+        if (!locationGroups[key]) {
+          locationGroups[key] = { lat, lon, events: [] };
+        }
+        locationGroups[key].events.push(event);
+      }
+    });
+
+    // Add markers for each unique location
+    Object.values(locationGroups).forEach(loc => {
+      if (loc.events.length > 0) {
+        const event = loc.events[0];
+        const popupText = `<div class="location-popup"><strong>${event.city || 'Unknown'}</strong><br>${event.country}<br><strong>${event.org}</strong><br><small>${loc.events.length} event(s)</small></div>`;
+        L.circleMarker([loc.lat, loc.lon], {
+          radius: Math.min(10, Math.sqrt(loc.events.length) * 3),
+          fillColor: '#C9A84C',
+          color: '#0F172A',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.7
+        }).bindPopup(popupText).addTo(engagementMap);
+      }
+    });
+  }
+}
+
+function findEventByCoords(lat, lon, allDiagnostics, allEngagement) {
+  for (const diag of allDiagnostics) {
+    const eng = allEngagement[diag.id];
+    if (eng && eng.events) {
+      for (const event of eng.events) {
+        if (event.lat === lat && event.lon === lon) {
+          return event;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// Auto-login if key in session
+document.getElementById('api-key').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+if (getKey()) {
+  fetch(`${API}?action=ping`, { headers: { 'x-portal-api-key': getKey() } })
+    .then(r => { if (r.ok) showDashboard(); })
+    .catch(() => {});
+}
+</script>
+</body>
+</html>

@@ -30,15 +30,28 @@ function parseUserAgent(userAgent) {
   return { device, browser };
 }
 
-// Extract country from IP
-async function getCountryFromIP(ipAddress) {
+// Extract geolocation from IP using ip-api.com service
+// Returns country, city, lat, lon, and organization
+async function getGeolocationFromIP(ipAddress) {
   try {
     const response = await fetch(`http://ip-api.com/json/${ipAddress}`);
     const data = await response.json();
-    return data.country || 'unknown';
+    return {
+      country: data.country || 'unknown',
+      city: data.city || 'unknown',
+      lat: data.lat || null,
+      lon: data.lon || null,
+      org: data.org || 'unknown'  // ISP/Organization name
+    };
   } catch (error) {
-    console.warn('Could not resolve country from IP:', error);
-    return 'unknown';
+    console.warn('Could not resolve geolocation from IP:', error);
+    return {
+      country: 'unknown',
+      city: 'unknown',
+      lat: null,
+      lon: null,
+      org: 'unknown'
+    };
   }
 }
 
@@ -107,21 +120,25 @@ export default async (req, context) => {
     const ipAddress = getClientIP(req);
     const { device, browser } = parseUserAgent(userAgent);
 
-    // Get country from IP
-    let country = 'unknown';
+    // Get geolocation from IP
+    let geo = { country: 'unknown', city: 'unknown', lat: null, lon: null };
     try {
-      country = await getCountryFromIP(ipAddress);
+      geo = await getGeolocationFromIP(ipAddress);
     } catch (e) {
-      // Continue even if country lookup fails
+      // Continue even if geolocation lookup fails
     }
 
-    // Create event
+    // Create event with geolocation data
     const event = {
       eventId: `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type: 'cta_click',
       timestamp: new Date().toISOString(),
       ipAddress,
-      country,
+      country: geo.country,
+      city: geo.city,
+      lat: geo.lat,
+      lon: geo.lon,
+      org: geo.org,
       userAgent,
       device,
       browser,

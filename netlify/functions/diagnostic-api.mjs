@@ -297,11 +297,11 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
     const dashIdx = line.indexOf(' — ');
     const label = dashIdx > -1 ? line.slice(0, dashIdx) : line;
     const detail = dashIdx > -1 ? line.slice(dashIdx + 3) : '';
-    return `<tr><td width="20" valign="top" style="padding:6px 0;"><div style="width:6px;height:6px;background:#1B6EC2;border-radius:50%;margin-top:8px;"></div></td><td style="padding:6px 0 6px 12px;font-size:14px;line-height:1.6;color:#2c2c3e;"><strong style="color:#0A1C42;">${e(label)}</strong>${detail ? ` — ${e(detail)}` : ''}</td></tr>`;
+    return `<tr><td width="20" valign="top" style="padding:6px 0;"><div style="width:6px;height:6px;background:#C9A84C;border-radius:50%;margin-top:8px;"></div></td><td style="padding:6px 0 6px 12px;font-size:14px;line-height:1.6;color:#2c2c3e;"><strong style="color:#0F172A;">${e(label)}</strong>${detail ? ` — ${e(detail)}` : ''}</td></tr>`;
   }).join('');
 
   const findings = (d.section1_findings || []).map(f =>
-    `<tr><td width="20" valign="top" style="padding:6px 0;"><div style="width:6px;height:6px;background:#1B6EC2;border-radius:50%;margin-top:8px;"></div></td><td style="padding:6px 0 6px 12px;font-size:15px;line-height:1.7;color:#2c2c3e;">${e(f)}</td></tr>`
+    `<tr><td width="20" valign="top" style="padding:6px 0;"><div style="width:6px;height:6px;background:#C9A84C;border-radius:50%;margin-top:8px;"></div></td><td style="padding:6px 0 6px 12px;font-size:15px;line-height:1.7;color:#2c2c3e;">${e(f)}</td></tr>`
   ).join('');
 
   const secondary = (d.section2_secondary || []).map(s =>
@@ -309,7 +309,7 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
   ).join('');
 
   const steps = (d.section3_steps || []).map((s, i) =>
-    `<tr><td width="32" valign="top" style="padding:6px 0;"><div style="width:24px;height:24px;background:#EBF3FA;border-radius:50%;text-align:center;line-height:24px;font-size:12px;font-weight:700;color:#1B6EC2;">${i + 1}</div></td><td style="padding:6px 0 6px 12px;font-size:15px;line-height:1.7;color:#2c2c3e;">${e(s)}</td></tr>`
+    `<tr><td width="32" valign="top" style="padding:6px 0;"><div style="width:24px;height:24px;background:rgba(201,168,76,0.1);border-radius:50%;text-align:center;line-height:24px;font-size:12px;font-weight:700;color:#C9A84C;">${i + 1}</div></td><td style="padding:6px 0 6px 12px;font-size:15px;line-height:1.7;color:#2c2c3e;">${e(s)}</td></tr>`
   ).join('');
 
   return `<!DOCTYPE html>
@@ -327,17 +327,17 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
 
   <!-- Header -->
   <tr>
-    <td style="background:#0A1C42;padding:36px 48px 28px;">
+    <td style="background:#0F172A;padding:36px 48px 28px;">
       <div style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:0.5px;">BW Advisory Solutions</div>
-      <div style="color:#EBF3FA;font-size:12px;margin-top:4px;letter-spacing:0.5px;">bwadvisorysolutions.com.au</div>
+      <div style="color:rgba(201,168,76,0.1);font-size:12px;margin-top:4px;letter-spacing:0.5px;">bwadvisorysolutions.com.au</div>
     </td>
   </tr>
 
   <!-- Title block -->
   <tr>
-    <td style="background:#EBF3FA;padding:28px 48px;border-left:4px solid #1B6EC2;">
-      <div style="color:#1B6EC2;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">${diagType === 'operational' ? 'Operational' : 'Strategic'} Diagnostic Assessment</div>
-      <div style="font-size:22px;font-weight:700;color:#0A1C42;line-height:1.3;">${e(d.headline || '')}</div>
+    <td style="background:rgba(201,168,76,0.1);padding:28px 48px;border-left:4px solid #C9A84C;">
+      <div style="color:#C9A84C;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">${diagType === 'operational' ? 'Operational' : 'Strategic'} Diagnostic Assessment</div>
+      <div style="font-size:22px;font-weight:700;color:#0F172A;line-height:1.3;">${e(d.headline || '')}</div>
       <div style="margin-top:16px;font-size:13px;color:#666;">
         Prepared for: <strong>${e(prospect.name)}</strong>, ${e(prospect.role)}, ${e(prospect.organisation)}<br>
         Date: ${today}
@@ -352,14 +352,14 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:36px;">
       <tr>
         <td width="36" valign="top">
-          <div style="width:30px;height:30px;background:#0A1C42;border-radius:50%;text-align:center;line-height:30px;font-size:14px;font-weight:700;color:#fff;">1</div>
+          <div style="width:30px;height:30px;background:#0F172A;border-radius:50%;text-align:center;line-height:30px;font-size:14px;font-weight:700;color:#fff;">1</div>
         </td>
         <td style="padding-left:12px;vertical-align:middle;">
-          <div style="font-size:17px;font-weight:700;color:#0A1C42;">${diagType === 'operational' ? 'Operational' : 'Strategic'} Reality Assessment</div>
+          <div style="font-size:17px;font-weight:700;color:#0F172A;">${diagType === 'operational' ? 'Operational' : 'Strategic'} Reality Assessment</div>
         </td>
       </tr>
       <tr><td colspan="2" style="padding-top:16px;">
-        <div style="background:#f9fbfd;border-left:3px solid #1B6EC2;padding:20px 24px;border-radius:0 4px 4px 0;">
+        <div style="background:#f9fbfd;border-left:3px solid #C9A84C;padding:20px 24px;border-radius:0 4px 4px 0;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             ${findings}
           </table>
@@ -371,10 +371,10 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:36px;">
       <tr>
         <td width="36" valign="top">
-          <div style="width:30px;height:30px;background:#0A1C42;border-radius:50%;text-align:center;line-height:30px;font-size:14px;font-weight:700;color:#fff;">2</div>
+          <div style="width:30px;height:30px;background:#0F172A;border-radius:50%;text-align:center;line-height:30px;font-size:14px;font-weight:700;color:#fff;">2</div>
         </td>
         <td style="padding-left:12px;vertical-align:middle;">
-          <div style="font-size:17px;font-weight:700;color:#0A1C42;">Core Constraint Analysis</div>
+          <div style="font-size:17px;font-weight:700;color:#0F172A;">Core Constraint Analysis</div>
         </td>
       </tr>
       <tr><td colspan="2" style="padding-top:16px;">
@@ -399,17 +399,17 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
       <tr>
         <td width="36" valign="top">
-          <div style="width:30px;height:30px;background:#0A1C42;border-radius:50%;text-align:center;line-height:30px;font-size:14px;font-weight:700;color:#fff;">3</div>
+          <div style="width:30px;height:30px;background:#0F172A;border-radius:50%;text-align:center;line-height:30px;font-size:14px;font-weight:700;color:#fff;">3</div>
         </td>
         <td style="padding-left:12px;vertical-align:middle;">
-          <div style="font-size:17px;font-weight:700;color:#0A1C42;">Where the Work Lies</div>
+          <div style="font-size:17px;font-weight:700;color:#0F172A;">Where the Work Lies</div>
         </td>
       </tr>
       <tr><td colspan="2" style="padding-top:16px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
           ${steps}
         </table>
-        <div style="background:#EBF3FA;padding:18px 20px;border-radius:4px;">
+        <div style="background:rgba(201,168,76,0.1);padding:18px 20px;border-radius:4px;">
           <div style="font-size:15px;line-height:1.7;color:#2c2c3e;">${e(d.section3_close || '')}</div>
         </div>
       </td></tr>
@@ -419,21 +419,21 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
     ${alignmentItems ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
       <tr>
         <td width="36" valign="top">
-          <div style="width:30px;height:30px;background:#0A1C42;border-radius:50%;text-align:center;line-height:30px;font-size:14px;font-weight:700;color:#fff;">4</div>
+          <div style="width:30px;height:30px;background:#0F172A;border-radius:50%;text-align:center;line-height:30px;font-size:14px;font-weight:700;color:#fff;">4</div>
         </td>
         <td style="padding-left:12px;vertical-align:middle;">
-          <div style="font-size:17px;font-weight:700;color:#0A1C42;">Where BW Advisory Can Help</div>
+          <div style="font-size:17px;font-weight:700;color:#0F172A;">Where BW Advisory Can Help</div>
         </td>
       </tr>
       <tr><td colspan="2" style="padding-top:16px;">
-        <div style="background:#f9fbfd;border-left:3px solid #0A1C42;padding:20px 24px;border-radius:0 4px 4px 0;">
+        <div style="background:#f9fbfd;border-left:3px solid #0F172A;padding:20px 24px;border-radius:0 4px 4px 0;">
           <div style="font-size:13px;color:#666;margin-bottom:12px;line-height:1.5;">Based on this assessment, the following BW Advisory service lines are most relevant to your organisation's situation.</div>
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             ${alignmentItems}
           </table>
         </div>
         <div style="margin-top:16px;text-align:center;">
-          <a href="https://bwadvisorysolutions.com.au" style="display:inline-block;background:#1B6EC2;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;">Visit BW Advisory Solutions →</a>
+          <a href="https://bwadvisorysolutions.com.au" style="display:inline-block;background:#C9A84C;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;">Visit BW Advisory Solutions →</a>
         </div>
       </td></tr>
     </table>` : ''}
@@ -449,9 +449,9 @@ function renderReportHtml(d, prospect, diagType = 'strategic') {
 
   <!-- Footer -->
   <tr>
-    <td style="background:#0A1C42;padding:24px 48px;">
+    <td style="background:#0F172A;padding:24px 48px;">
       <div style="color:#ffffff;font-size:13px;font-weight:700;margin-bottom:4px;">Brad Warburton</div>
-      <div style="color:#EBF3FA;font-size:12px;line-height:1.8;">
+      <div style="color:rgba(201,168,76,0.1);font-size:12px;line-height:1.8;">
         BW Advisory Solutions<br>
         brad@bwadvisorysolutions.com.au &nbsp;·&nbsp; +61 407 779 474<br>
         bwadvisorysolutions.com.au
@@ -512,26 +512,26 @@ async function notifyBrad(submission, functionBase) {
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:720px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;">
 
-  <tr><td style="background:#0A1C42;padding:24px 36px;">
+  <tr><td style="background:#0F172A;padding:24px 36px;">
     <div style="color:#fff;font-size:15px;font-weight:700;">BW Advisory Solutions</div>
-    <div style="color:#EBF3FA;font-size:12px;margin-top:2px;">New Diagnostic Submission — Review Required</div>
+    <div style="color:rgba(201,168,76,0.1);font-size:12px;margin-top:2px;">New Diagnostic Submission — Review Required</div>
   </td></tr>
 
-  <tr><td style="background:#EBF3FA;padding:20px 36px;border-left:4px solid #1B6EC2;">
-    <div style="font-size:18px;font-weight:700;color:#0A1C42;">${escapeHtml(prospect.name)}</div>
+  <tr><td style="background:rgba(201,168,76,0.1);padding:20px 36px;border-left:4px solid #C9A84C;">
+    <div style="font-size:18px;font-weight:700;color:#0F172A;">${escapeHtml(prospect.name)}</div>
     <div style="font-size:14px;color:#555;margin-top:2px;">${escapeHtml(prospect.role)} &nbsp;·&nbsp; ${escapeHtml(prospect.organisation)}</div>
-    <div style="font-size:13px;color:#1B6EC2;margin-top:2px;">${escapeHtml(prospect.email)}</div>
+    <div style="font-size:13px;color:#C9A84C;margin-top:2px;">${escapeHtml(prospect.email)}</div>
     <div style="font-size:12px;color:#999;margin-top:4px;">Submitted: ${new Date(submission.submittedAt).toLocaleString('en-AU', { timeZone: 'Australia/Perth', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} AWST</div>
   </td></tr>
 
   <tr><td style="padding:28px 36px;">
 
-    <div style="font-size:14px;font-weight:700;color:#0A1C42;margin-bottom:10px;">Submission Answers</div>
+    <div style="font-size:14px;font-weight:700;color:#0F172A;margin-bottom:10px;">Submission Answers</div>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #eef0f5;border-radius:4px;margin-bottom:28px;overflow:hidden;">
       ${answersHtml}
     </table>
 
-    <div style="font-size:14px;font-weight:700;color:#0A1C42;margin-bottom:12px;">Generated Report Preview</div>
+    <div style="font-size:14px;font-weight:700;color:#0F172A;margin-bottom:12px;">Generated Report Preview</div>
     <div style="border:1px solid #dde4ed;border-radius:6px;overflow:hidden;margin-bottom:28px;">
       ${report.html}
     </div>
@@ -539,7 +539,7 @@ async function notifyBrad(submission, functionBase) {
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
       <tr>
         <td style="padding-right:8px;">
-          <a href="${approveUrl}" style="display:block;background:#1B6EC2;color:#fff;padding:14px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;text-align:center;">
+          <a href="${approveUrl}" style="display:block;background:#C9A84C;color:#fff;padding:14px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;text-align:center;">
             ✓ Approve &amp; Send to ${escapeHtml(prospect.name)}
           </a>
         </td>
@@ -588,11 +588,11 @@ function brandedPage(title, content) {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .card { background: #fff; max-width: 520px; width: 100%; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(10,28,66,0.1); }
-  .header { background: #0A1C42; padding: 24px 36px; }
+  .header { background: #0F172A; padding: 24px 36px; }
   .header-brand { color: #fff; font-size: 15px; font-weight: 700; }
-  .header-sub { color: #EBF3FA; font-size: 12px; margin-top: 2px; }
+  .header-sub { color: rgba(201,168,76,0.1); font-size: 12px; margin-top: 2px; }
   .body { padding: 36px; }
-  h1 { color: #0A1C42; font-size: 21px; margin-bottom: 14px; font-weight: 700; }
+  h1 { color: #0F172A; font-size: 21px; margin-bottom: 14px; font-weight: 700; }
   p { font-size: 15px; color: #444; line-height: 1.7; }
 </style>
 </head>

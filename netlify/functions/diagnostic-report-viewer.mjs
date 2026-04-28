@@ -39,11 +39,11 @@ export default async (req, context) => {
 <meta http-equiv="refresh" content="3">
 <title>Report Loading — BW Advisory Solutions</title>
 <style>
-  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .card { background: #fff; max-width: 480px; padding: 48px; border-radius: 10px; text-align: center; box-shadow: 0 4px 24px rgba(10,28,66,0.1); }
-  .header { color: #0A1C42; font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f4f0; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .card { background: #fff; max-width: 480px; padding: 48px; border-radius: 10px; text-align: center; box-shadow: 0 4px 24px rgba(15,23,42,0.1); }
+  .header { color: #0F172A; font-size: 24px; font-weight: 700; margin-bottom: 12px; }
   .spinner { margin: 24px 0; }
-  .dot { width: 8px; height: 8px; background: #1B6EC2; border-radius: 50%; display: inline-block; margin: 0 4px; animation: pulse 1.5s infinite; }
+  .dot { width: 8px; height: 8px; background: #C9A84C; border-radius: 50%; display: inline-block; margin: 0 4px; animation: pulse 1.5s infinite; }
   .dot:nth-child(2) { animation-delay: 0.2s; }
   .dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
