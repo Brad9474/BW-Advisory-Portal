@@ -1,6 +1,7 @@
 [build]
   functions = "netlify/functions"
   publish = "."
+  # Force fresh deploy of all files
 
 # Serve static assets from public folder without redirect
 [[redirects]]
