@@ -3,6 +3,12 @@
   publish = "."
   # Force fresh deploy of all files
 
+# Root redirects to client portal
+[[redirects]]
+  from = "/"
+  to = "/client/index.html"
+  status = 200
+
 # Serve static assets from public folder without redirect
 [[redirects]]
   from = "/public/*"
