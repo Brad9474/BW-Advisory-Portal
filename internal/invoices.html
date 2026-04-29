@@ -8,9 +8,9 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; }
-.nav { background: #0A1C42; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.nav { background: #0F172A; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
 .nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
-.nav-tag { background: rgba(27,110,194,0.35); color: #7aaee8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-left: 12px; }
+.nav-tag { background: rgba(201,168,76,0.15); color: #C9A84C; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-left: 12px; }
 .nav-links { display: flex; align-items: center; gap: 16px; }
 .nav-link { color: #EBF3FA; font-size: 13px; text-decoration: none; opacity: 0.75; white-space: nowrap; }
 .nav-link:hover, .nav-link.active { opacity: 1; font-weight: 600; }
@@ -18,10 +18,10 @@ body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa;
 .btn-signout:hover { background: rgba(255,255,255,0.1); }
 .page { flex: 1; padding: 40px 48px; max-width: 1200px; }
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
-.page-title { font-size: 22px; font-weight: 700; color: #0A1C42; }
+.page-title { font-size: 22px; font-weight: 700; color: #0F172A; }
 .page-sub { font-size: 13px; color: #6a7a8a; margin-top: 4px; }
-.btn-primary { background: #1B6EC2; color: #fff; border: none; border-radius: 7px; padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
-.btn-primary:hover { background: #155fa8; }
+.btn-primary { background: #C9A84C; color: #0F172A; border: none; border-radius: 7px; padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+.btn-primary:hover { background: #E0BC60; }
 .btn-primary:disabled { opacity: 0.55; cursor: default; }
 
 /* Add invoice form */
@@ -34,7 +34,7 @@ body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa;
 .field label { display: block; font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 6px; }
 .field input, .field select, .field textarea { width: 100%; padding: 10px 13px; border: 1.5px solid #dde4ed; border-radius: 6px; font-size: 14px; font-family: inherit; color: #1a1a2e; background: #fafbfc; }
 .field textarea { resize: vertical; min-height: 72px; }
-.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #1B6EC2; background: #fff; box-shadow: 0 0 0 3px rgba(27,110,194,0.08); }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #C9A84C; background: #fff; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
 .field.has-error input, .field.has-error select { border-color: #c0392b; }
 .field-err { font-size: 12px; color: #c0392b; margin-top: 4px; display: none; }
 .field.has-error .field-err { display: block; }
@@ -44,7 +44,7 @@ body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #f5f7fa;
 .items-table th { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; text-align: left; padding: 6px 8px; border-bottom: 1px solid #eef0f5; }
 .items-table td { padding: 6px 4px; vertical-align: top; }
 .items-table td input { padding: 8px 10px; border: 1.5px solid #dde4ed; border-radius: 5px; font-size: 13px; font-family: inherit; background: #fafbfc; width: 100%; }
-.items-table td input:focus { outline: none; border-color: #1B6EC2; background: #fff; }
+.items-table td input:focus { outline: none; border-color: #C9A84C; background: #fff; }
 .col-qty  { width: 70px; }
 .col-price{ width: 110px; }
 .col-name { width: 200px; }

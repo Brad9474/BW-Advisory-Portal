@@ -17,7 +17,7 @@ body {
 
 /* ── Nav ── */
 .nav {
-  background: #0A1C42;
+  background: #0F172A;
   padding: 0 48px;
   display: flex;
   align-items: center;
@@ -26,8 +26,8 @@ body {
 }
 .nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
 .nav-tag {
-  background: rgba(27,110,194,0.35);
-  color: #7aaee8;
+  background: rgba(201,168,76,0.15);
+  color: #C9A84C;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -37,11 +37,11 @@ body {
   margin-left: 12px;
 }
 .nav-right { display: flex; align-items: center; gap: 20px; }
-.nav-link { color: #EBF3FA; font-size: 13px; text-decoration: none; opacity: 0.75; }
-.nav-link:hover { opacity: 1; }
+.nav-link { color: #C0C8D0; font-size: 13px; text-decoration: none; opacity: 0.75; }
+.nav-link:hover { opacity: 1; color: #C9A84C; }
 .btn-signout {
   background: none; border: 1px solid rgba(255,255,255,0.2);
-  color: #EBF3FA; font-size: 12px; padding: 5px 12px;
+  color: #C0C8D0; font-size: 12px; padding: 5px 12px;
   border-radius: 4px; cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
@@ -58,17 +58,17 @@ body {
 .gate-card {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 6px 32px rgba(10,28,66,0.1);
+  box-shadow: 0 6px 32px rgba(15,23,42,0.1);
   width: 100%;
   max-width: 400px;
   overflow: hidden;
 }
 .gate-header {
-  background: #0A1C42;
+  background: #0F172A;
   padding: 24px 32px;
 }
 .gate-title { color: #fff; font-size: 17px; font-weight: 700; }
-.gate-sub { color: #a8c0d8; font-size: 12px; margin-top: 4px; }
+.gate-sub { color: #C0C8D0; font-size: 12px; margin-top: 4px; }
 .gate-body { padding: 28px 32px; }
 .field { margin-bottom: 20px; }
 .field label { display: block; font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 7px; }
@@ -78,18 +78,18 @@ body {
   font-size: 15px; font-family: inherit; color: #1a1a2e;
   background: #fafbfc; transition: border-color 0.18s;
 }
-.field input:focus { outline: none; border-color: #1B6EC2; background: #fff; box-shadow: 0 0 0 3px rgba(27,110,194,0.08); }
+.field input:focus { outline: none; border-color: #C9A84C; background: #fff; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
 .field.has-error input { border-color: #c0392b; }
 .field-err { font-size: 12px; color: #c0392b; margin-top: 5px; display: none; }
 .field.has-error .field-err { display: block; }
 .btn-login {
-  width: 100%; background: #1B6EC2; color: #fff;
+  width: 100%; background: #C9A84C; color: #0F172A;
   border: none; border-radius: 7px; padding: 13px;
   font-size: 15px; font-weight: 700; cursor: pointer;
   font-family: inherit; transition: background 0.15s;
 }
-.btn-login:hover { background: #155fa8; }
-.btn-login:disabled { background: #C0C8D0; cursor: not-allowed; }
+.btn-login:hover { background: #E0BC60; }
+.btn-login:disabled { background: rgba(201,168,76,0.4); cursor: not-allowed; color: rgba(15,23,42,0.5); }
 
 /* ── Dashboard (post-login) ── */
 .dashboard { flex: 1; padding: 40px 48px; display: none; }

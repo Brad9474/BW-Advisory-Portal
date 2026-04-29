@@ -24,8 +24,8 @@ body {
   text-decoration: none;
   display: block;
 }
-.brand-name { font-size: 16px; font-weight: 700; color: #0A1C42; letter-spacing: 0.3px; }
-.brand-tagline { font-size: 12px; color: #7a8fa8; margin-top: 3px; }
+.brand-name { font-size: 16px; font-weight: 700; color: #0F172A; letter-spacing: 0.3px; }
+.brand-tagline { font-size: 12px; color: #C9A84C; margin-top: 3px; font-weight: 600; }
 
 .card {
   background: #fff;
@@ -35,59 +35,63 @@ body {
   max-width: 420px;
   overflow: hidden;
 }
-.card-header { background: #0A1C42; padding: 24px 32px; }
-.card-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #7aaee8; font-weight: 700; margin-bottom: 8px; }
+.card-header { background: #0F172A; padding: 24px 32px; }
+.card-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #C9A84C; font-weight: 700; margin-bottom: 8px; }
 .card-title { color: #fff; font-size: 18px; font-weight: 700; }
-.card-sub { color: #a8c0d8; font-size: 13px; margin-top: 4px; }
+.card-sub { color: #C0C8D0; font-size: 13px; margin-top: 4px; }
 .card-body { padding: 28px 32px; }
 
 /* Loading / error states */
 .state { text-align: center; padding: 12px 0; }
 .spinner { width: 32px; height: 32px; border: 3px solid #dde4ed; border-top-color: #1B6EC2; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 16px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.state-title { font-size: 16px; font-weight: 700; color: #0A1C42; margin-bottom: 8px; }
+.state-title { font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 8px; }
 .state-body { font-size: 14px; color: #666; line-height: 1.7; }
-.state-body a { color: #1B6EC2; }
+.state-body a { color: #C9A84C; text-decoration: none; font-weight: 600; }
 
 /* Form */
 .form { display: none; }
-.welcome-name { font-size: 15px; color: #0A1C42; font-weight: 700; margin-bottom: 4px; }
+.welcome-name { font-size: 15px; color: #0F172A; font-weight: 700; margin-bottom: 4px; }
 .welcome-org { font-size: 13px; color: #888; margin-bottom: 24px; }
+.welcome-privacy { font-size: 12px; color: #666; background: rgba(201,168,76,0.08); border-left: 3px solid #C9A84C; padding: 12px 14px; border-radius: 4px; margin-bottom: 20px; }
+.welcome-privacy a { color: #C9A84C; font-weight: 600; text-decoration: none; }
 .field { margin-bottom: 20px; }
-.field label { display: block; font-size: 13px; font-weight: 600; color: #0A1C42; margin-bottom: 7px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: #0F172A; margin-bottom: 7px; }
 .field input {
   width: 100%; padding: 11px 14px;
   border: 1.5px solid #dde4ed; border-radius: 7px;
   font-size: 15px; font-family: inherit; color: #1a1a2e;
   background: #fafbfc; transition: border-color 0.18s;
 }
-.field input:focus { outline: none; border-color: #1B6EC2; background: #fff; box-shadow: 0 0 0 3px rgba(27,110,194,0.08); }
+.field input:focus { outline: none; border-color: #C9A84C; background: #fff; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
 .field.has-error input { border-color: #c0392b; }
 .field-err { font-size: 12px; color: #c0392b; margin-top: 5px; display: none; }
 .field.has-error .field-err { display: block; }
 .hint { font-size: 12px; color: #9aaabb; margin-top: 5px; }
 .btn-submit {
-  width: 100%; background: #1B6EC2; color: #fff;
+  width: 100%; background: #C9A84C; color: #0F172A;
   border: none; border-radius: 7px; padding: 13px;
   font-size: 15px; font-weight: 700; cursor: pointer;
   font-family: inherit; transition: background 0.15s; margin-top: 4px;
 }
-.btn-submit:hover { background: #155fa8; }
-.btn-submit:disabled { background: #C0C8D0; cursor: not-allowed; }
+.btn-submit:hover { background: #E0BC60; }
+.btn-submit:disabled { background: rgba(201,168,76,0.4); cursor: not-allowed; color: rgba(15,23,42,0.5); }
 
 /* Already has account state */
 .has-account { display: none; text-align: center; }
 .has-account .icon { font-size: 36px; margin-bottom: 14px; }
 .btn-login {
-  display: inline-block; background: #1B6EC2; color: #fff;
+  display: inline-block; background: #C9A84C; color: #0F172A;
   border: none; border-radius: 7px; padding: 12px 28px;
   font-size: 15px; font-weight: 700; cursor: pointer;
   font-family: inherit; text-decoration: none; margin-top: 16px;
 }
-.btn-login:hover { background: #155fa8; }
+.btn-login:hover { background: #E0BC60; }
 
 .footer-link { text-align: center; margin-top: 20px; font-size: 13px; color: #888; }
-.footer-link a { color: #1B6EC2; text-decoration: none; }
+.footer-link a { color: #C9A84C; text-decoration: none; font-weight: 600; }
+.footer-privacy { text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid #dde4ed; font-size: 11px; color: #999; line-height: 1.6; }
+.footer-privacy a { color: #C9A84C; text-decoration: none; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -136,6 +140,9 @@ body {
     <div class="form" id="form-create">
       <div class="welcome-name" id="welcome-name"></div>
       <div class="welcome-org" id="welcome-org"></div>
+      <div class="welcome-privacy">
+        Your data is secure and protected under the Australian Privacy Act. <a href="https://bwadvisorysolutions.com.au/privacy" target="_blank">Read our Privacy Policy</a> to learn how we protect your information.
+      </div>
 
       <div class="field" id="f-password">
         <label for="password">Create a password</label>
@@ -158,6 +165,10 @@ body {
 
 <div class="footer-link">
   Need help? <a href="mailto:brad@bwadvisorysolutions.com.au">brad@bwadvisorysolutions.com.au</a>
+</div>
+
+<div class="footer-privacy">
+  Your data is protected under the Australian Privacy Act. <a href="https://bwadvisorysolutions.com.au/privacy" target="_blank">Privacy Policy</a>
 </div>
 
 <script>
