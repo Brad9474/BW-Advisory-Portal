@@ -144,6 +144,44 @@
                     </div>
                 </div>
 
+                <!-- PRIVACY & CONSENT SECTION -->
+                <div class="space-y-6 pt-8 border-t border-accent/20">
+                    <!-- Trust & Assurance Banner -->
+                    <div class="bg-white/5 border-l-4 border-gold rounded p-6 space-y-3">
+                        <p class="text-silver/80 text-sm leading-relaxed">
+                            <span class="text-gold font-semibold">Trust & Assurance</span>
+                        </p>
+                        <p class="text-silver/80 text-sm leading-relaxed">
+                            Your data is secure and protected under the Australian Privacy Act.
+                        </p>
+                        <p class="text-silver/80 text-sm leading-relaxed">
+                            <a href="https://bwadvisorysolutions.com.au/privacy" target="_blank" class="text-gold underline hover:text-gold/80">Read our Privacy Policy</a>
+                            to learn how we protect your data.
+                        </p>
+                    </div>
+
+                    <!-- Consent Checkboxes -->
+                    <div class="space-y-4">
+                        <p class="text-accent/70 font-mono text-xs tracking-widest uppercase font-bold">Consent Required</p>
+
+                        <label class="flex items-start gap-4 cursor-pointer group">
+                            <input type="checkbox" name="privacy_policy_consent" required
+                                   class="mt-1 w-5 h-5 accent-gold flex-shrink-0">
+                            <span class="text-silver/70 text-sm leading-relaxed group-hover:text-silver/90">
+                                I have read and agree to the Privacy Policy
+                            </span>
+                        </label>
+
+                        <label class="flex items-start gap-4 cursor-pointer group">
+                            <input type="checkbox" name="data_processing_consent" required
+                                   class="mt-1 w-5 h-5 accent-gold flex-shrink-0">
+                            <span class="text-silver/70 text-sm leading-relaxed group-hover:text-silver/90">
+                                I consent to my data being collected and processed as described in the Privacy Policy
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="pt-8 flex items-center justify-between">
                     <div id="status" class="text-xs font-mono text-gold opacity-0 transition-opacity">Submitting...</div>
                     <button type="submit" class="magnetic-button bg-gold px-12 py-5 rounded-lg text-primary font-bold text-sm tracking-[0.15em] uppercase">Start Conversation</button>
