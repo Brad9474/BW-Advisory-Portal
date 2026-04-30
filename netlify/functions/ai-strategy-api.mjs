@@ -27,36 +27,46 @@ export const handler = async (event, context) => {
     }
 
     // --- GLOBAL STRATEGIC BASELINE ---
-    let summary = 'Your current stack is "Leaky" (A$233 wastage identified). We are pivoting these savings into a "Digital Twin" pilot for your new Advisory service.';
+    let summary = 'Strategic Objective: Transition BW Advisory from "Manual Advisory" to "AI-Orchestrated Scaling". The current mandate is to pivot identified wastage (~A$233/yr) into a high-trust "Digital Twin" pilot that handles prospect triage and authority scaling autonomously.';
     
     let timeline = {
       now: {
-        title: 'NOW: Fix the Leaks (0-30 Days)',
+        title: 'NOW: Tactical Optimization (0-30 Days)',
         actions: [
-          'Drop Granola to Basic (Save A$233/yr immediately).',
-          'Consolidate AI Logic on Claude Pro.'
+          'Rationalise meeting intelligence: Drop Granola to Basic (Save A$233/yr).',
+          'Standardise Frontier Models: Consolidate all strategic logic on Claude 3.7 Pro.',
+          'Execute Diagnostic Audit: Identify the top 3 recurring client data silos for AI porting.'
         ],
-        rationale: 'You are over-provisioned on Business tiers for meeting tools.'
+        rationale: 'Board Context: Current wastage in overlapping meeting tools is a direct tax on your innovation budget. By standardising on Claude 3.7, you achieve "Maximum Reasoning Density" per dollar spent, creating a solid foundation for the autonomous layer.'
       },
       shortTerm: {
         title: 'SHORT TERM: The Pilot (1-6 Months)',
-        actions: ['Build "Digital Bradley 1.0" using HeyGen + Hume AI API.'],
-        rationale: 'Scales your authority and automates lead qualification.'
+        actions: [
+          'Architect "Digital Bradley 1.0": High-fidelity integration of HeyGen Visuals with Hume AI EQ.',
+          'Deploy Triage Automator: AI-led qualification for all new portal intakes.',
+          'Context Retrieval: Move historical diagnostic context into a retrieval-augmented (RAG) store.'
+        ],
+        rationale: 'Strategic Context: Your time is the primary bottleneck for revenue growth. The Digital Twin is a scalable lead-filter. By automating initial triage, you ensure only High-Value (HV) prospects reach your personal calendar, increasing your effective hourly rate by an estimated 30%.'
       },
       longTerm: {
-        title: 'LONG TERM: Scale & Architect (6+ Months)',
-        actions: ['Transition BW Advisory to an "AI Architect" model with subcontractors.'],
-        rationale: 'Moves you from technician to orchestrator.'
+        title: 'LONG TERM: Ecosystem Orchestrator (6+ Months)',
+        actions: [
+          'Pivot to "AI Architect" Model: Managing a hybrid network of subcontractors and AI agents.',
+          'Launch Automated Advisory Hub: A client-facing command center with real-time AI insights.',
+          'Monetise IP: Package the "Glass Box" model as a standalone advisory framework for licensing.'
+        ],
+        rationale: 'Vision Context: The ultimate goal is moving from "Technician" (doing the work) to "Orchestrator" (owning the system). This phase matures the portal from a backend management tool into your primary revenue-generating product.'
       }
     };
 
     let costingAnalysis = [
-      { item: 'HeyGen (Visual)', tier: 'Pro Annual', cost: '$79 USD/mo (~A$120)', rationale: 'Unlocks Avatar IV and LiveAvatar API.', leverage: '24/7 Authority Scaling.' },
-      { item: 'Hume AI (Vocal)', tier: 'Creator Tier', cost: '$7 USD/mo (~A$11)', rationale: '200 mins of empathic voice.', leverage: 'Adds EQ to your Digital Twin.' }
+      { item: 'HeyGen (Visual)', tier: 'Pro Annual', cost: '$79 USD/mo (~A$120)', rationale: 'Unlocks Avatar IV and LiveAvatar API for real-time interaction.', leverage: '24/7 Authority Scaling without personal fatigue.' },
+      { item: 'Hume AI (Vocal)', tier: 'Creator Tier', cost: '$7 USD/mo (~A$11)', rationale: '200 mins of empathic voice processing per month.', leverage: 'Adds necessary EQ to your Digital Twin for prospect trust.' },
+      { item: 'Claude 3.7 Pro', tier: 'Professional', cost: '$20 USD/mo (~A$31)', rationale: 'State-of-the-art reasoning for advisory reporting.', leverage: 'Primary logic engine for all strategic automation.' }
     ];
 
     let savings = [
-      { tool: 'Granola', action: 'Switch to Basic', saving: 'A$233/yr', reason: 'Basic tier includes HubSpot sync; premium history is currently redundant.' }
+      { tool: 'Granola', action: 'Switch to Basic', saving: 'A$233/yr', reason: 'Basic tier includes the critical HubSpot sync; premium history is currently redundant given your RAG plans.' }
     ];
 
     // --- CONTEXT-AWARE INTELLIGENCE LAYER ---
@@ -65,25 +75,25 @@ export const handler = async (event, context) => {
       
       // Handle "Not Paying" / "Trial" / "Tour" context
       if (lowerContext.includes('tour') || lowerContext.includes('trial') || lowerContext.includes('not paying')) {
-        summary = `Strategic Hub updated with your recent context: Since you are on a zero-cost trial/tour for Granola, our immediate "Financial Pivot" focus shifts from cost-cutting to **Value Extraction**. We will use this trial period to validate the HubSpot sync reliability before any long-term commitment.`;
+        summary = `Strategic Hub updated: Since you are currently on a zero-cost trial/tour for Granola, our immediate "Financial Pivot" focus shifts from cost-cutting to **Rapid Value Extraction**. Use this window to validate HubSpot sync reliability before any long-term commitment.`;
         
         // Update Roadmap "NOW"
         timeline.now.actions = [
-          'Validate Granola Trial: Stress-test HubSpot sync with 10+ meetings.',
-          'Consolidate AI Logic: Use Claude Pro for all strategic reporting.'
+          'Validate Granola Trial: Stress-test HubSpot sync with 10+ distinct meetings.',
+          'Consolidate AI Logic: Use Claude Pro for all high-level strategic reporting.'
         ];
-        timeline.now.rationale = 'Since you are currently at $0 cost, the goal is "Stress-Testing" rather than "Cost-Cutting".';
+        timeline.now.rationale = 'Since you are currently at $0 cost, the goal is "Stress-Testing" for reliability rather than "Cost-Cutting" for efficiency.';
         
         // Remove from savings matrix (it's not a leak if it's free)
         savings = [];
       }
 
-      // Handle "Pricing Plans" context (Snipps or others)
+      // Handle "Pricing Plans" context
       if (lowerContext.includes('snipp') || lowerContext.includes('pricing plan')) {
-        summary += ` | Snipps Integration: I have noted the pricing plans provided. These will be rationalized against the "AI Architect" long-term model to determine if we subcontract these builds or keep them internal.`;
+        summary += ` | Snipps Integration Note: Pricing plans provided are being rationalized against the "AI Architect" model to determine build-vs-buy subcontractor margins.`;
         
         // Add to Short Term Roadmap
-        timeline.shortTerm.actions.push('Rationalize Snipps Pricing against Subcontractor model.');
+        timeline.shortTerm.actions.push('Rationalize Snipps Pricing against Subcontractor margin model.');
       }
     }
 
@@ -97,9 +107,9 @@ export const handler = async (event, context) => {
           summary: summary,
           strategicAlerts: [
             {
-              title: 'New Frontier: Claude 3.7 Model Release',
-              message: 'Initial benchmarks show 14% higher reasoning accuracy for advisory reporting. Recommended: Start Free Trial.',
-              actionLabel: 'Start Trial',
+              title: 'New Frontier: Claude 3.7 Reasoning Engine',
+              message: 'Initial benchmarks show significant reasoning gains for advisory reporting. Recommended: Consolidate logic here.',
+              actionLabel: 'Upgrade Logic',
               actionLink: 'https://claude.ai/'
             }
           ],
@@ -108,13 +118,15 @@ export const handler = async (event, context) => {
           savings: savings,
           frontier: [
             { category: 'Digital Twin', candidate: 'HeyGen', useCase: 'Interactive Avatar diagnostics.', relevance: 'Critical', status: 'Action Recommended' },
-            { category: 'Vocal AI', candidate: 'Hume AI', useCase: 'Empathic voice interaction.', relevance: 'High', status: 'Researching' }
+            { category: 'Vocal AI', candidate: 'Hume AI', useCase: 'Empathic voice interaction.', relevance: 'High', status: 'In Research' },
+            { category: 'Reasoning', candidate: 'Claude 3.7', useCase: 'Primary advisory reporting logic.', relevance: 'Critical', status: 'Deploying' }
           ],
           advisory: {
             auditChecklist: [
-              'Data Silos: Where is client data trapped in spreadsheets?',
-              'Communication Friction: Can AI handle 80% of initial triage?',
-              'Intelligence Gaps: Are they missing predictive trends?'
+              'Data Silos: Identify knowledge trapped in unstructured spreadsheets/emails (Strategic Risk).',
+              'Triage Bottlenecks: Can an AI handle 80% of initial discovery calls? (Scaling Opportunity).',
+              'Intelligence Parity: Ensuring your advisory tools outpace client-side internal tools (Competitiveness).',
+              'Governance: Establishing a "Board-Approved" AI safety baseline for sensitive client data.'
             ]
           }
         }

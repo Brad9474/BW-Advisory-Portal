@@ -386,6 +386,7 @@ async function showDashboard() {
   
   // TRIGGER STRATEGIC OVERLAY
   setTimeout(async () => {
+    if (sessionStorage.getItem('portal_briefing_shown')) return;
     try {
       const res = await fetch(STATUS_API, { headers: { 'x-portal-api-key': getKey() } });
       const data = await res.json();
@@ -411,6 +412,7 @@ async function showDashboard() {
         document.getElementById('status-scout').textContent = data.businessHealth.strategy.latestAlert;
         document.getElementById('status-bottom-line').textContent = data.bottomLine;
         document.getElementById('briefing-overlay').style.display = 'flex';
+        sessionStorage.setItem('portal_briefing_shown', 'true');
       }
     } catch (err) { console.warn('Status Overlay Fetch Failed:', err); }
   }, 800);

@@ -99,7 +99,8 @@ export default async (req) => {
 
         // Calculate metrics
         const now = new Date();
-        const ytdStart = new Date(now.getFullYear(), 0, 1);
+        const currentYear = now.getFullYear();
+        const ytdStart = new Date(now.getMonth() >= 6 ? currentYear : currentYear - 1, 6, 1);
 
         let revenueYTD = 0;
         let outstanding = 0;
@@ -111,7 +112,7 @@ export default async (req) => {
             revenueYTD += inv.total || 0;
             paidInvoices.push(inv);
           }
-          if (inv.status === 'pending' || inv.status === 'overdue') {
+          if (inv.status === 'pending' || inv.status === 'overdue' || inv.status === 'due') {
             outstanding += inv.total || 0;
           }
         });
@@ -321,7 +322,8 @@ export default async (req) => {
         const invoices = (hubData.state?.invoices || []);
 
         const now = new Date();
-        const ytdStart = new Date(now.getFullYear(), 0, 1);
+        const currentYear = now.getFullYear();
+        const ytdStart = new Date(now.getMonth() >= 6 ? currentYear : currentYear - 1, 6, 1);
 
         let revenueYTD = 0;
         let outstandingAmount = 0;
