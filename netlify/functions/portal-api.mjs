@@ -167,8 +167,15 @@ export default async (req) => {
       const token = url.searchParams.get('token');
       const td    = await verifyClientToken(store, token);
       if (td.error) return jsonResponse({ error: td.error }, 401);
+      
       const clients    = await load(store, 'clients');
-      const clientRec  = clients.find(c => c.id === td.clientId);
+      const idx        = clients.findIndex(c => c.id === td.clientId);
+      if (idx !== -1 && !clients[idx].activatedAt) {
+        clients[idx].activatedAt = new Date().toISOString();
+        await store.setJSON('clients', clients);
+      }
+
+      const clientRec  = clients[idx];
       const hasPassword = !!(clientRec?.passwordHash);
       return jsonResponse({ ok: true, hasPassword, client: {
         id:           td.clientId,
@@ -312,7 +319,7 @@ export default async (req) => {
       if (authErr) return jsonResponse(authErr, 401);
       const { id, status } = body;
       if (!id || !status) return jsonResponse({ error: 'Missing id or status' }, 400);
-      const allowed = ['pending', 'researched', 'called', 'converted', 'dismissed'];
+      const allowed = ['pending', 'researched', 'called', 'converted', 'dismissed', 'archived'];
       if (!allowed.includes(status)) return jsonResponse({ error: `Invalid status` }, 400);
       try {
         const intakes = await load(store, 'intakes');
@@ -324,6 +331,23 @@ export default async (req) => {
         return jsonResponse({ ok: true, intake: intakes[idx] });
       } catch (e) {
         return jsonResponse({ error: 'Failed to update intake', detail: e.message }, 500);
+      }
+    }
+
+    // ── delete-intake (internal) ──────────────────────────────────────────────
+    if (action === 'delete-intake') {
+      const authErr = requireBradAuth(req);
+      if (authErr) return jsonResponse(authErr, 401);
+      const { id } = body;
+      if (!id) return jsonResponse({ error: 'Missing id' }, 400);
+      try {
+        const intakes = await load(store, 'intakes');
+        const filtered = intakes.filter(i => i.id !== id);
+        if (filtered.length === intakes.length) return jsonResponse({ error: 'Intake not found' }, 404);
+        await store.setJSON('intakes', filtered);
+        return jsonResponse({ ok: true });
+      } catch (e) {
+        return jsonResponse({ error: 'Failed to delete intake', detail: e.message }, 500);
       }
     }
 
@@ -442,15 +466,15 @@ export default async (req) => {
     if (action === 'update-client') {
       const authErr = requireBradAuth(req);
       if (authErr) return jsonResponse(authErr, 401);
-      const { id, status } = body;
+      const { id, status, notes, activatedAt } = body;
       if (!id) return jsonResponse({ error: 'Missing id' }, 400);
-      const allowed = ['active', 'inactive', 'archived'];
-      if (status && !allowed.includes(status)) return jsonResponse({ error: 'Invalid status' }, 400);
       try {
         const clients = await load(store, 'clients');
         const idx = clients.findIndex(c => c.id === id);
         if (idx === -1) return jsonResponse({ error: 'Client not found' }, 404);
-        if (status) clients[idx].status = status;
+        if (status !== undefined) clients[idx].status = status;
+        if (notes !== undefined) clients[idx].notes = notes;
+        if (activatedAt !== undefined) clients[idx].activatedAt = activatedAt;
         clients[idx].updatedAt = new Date().toISOString();
         await store.setJSON('clients', clients);
         return jsonResponse({ ok: true, client: clients[idx] });

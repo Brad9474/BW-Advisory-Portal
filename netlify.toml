@@ -43,3 +43,6 @@
   for = "/.netlify/functions/*"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
+
+[functions."scheduled-scout"]
+  schedule = "0 9 * * 1"

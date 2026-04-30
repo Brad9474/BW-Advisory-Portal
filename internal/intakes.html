@@ -124,8 +124,9 @@ tr:hover td { background: #fafbfd; }
   <div class="nav-links">
     <a href="/internal/" class="nav-link">Dashboard</a>
     <a href="/internal/intakes.html" class="nav-link active">Intakes</a>
+    <a href="/internal/ai-strategy.html" class="nav-link">AI Strategy</a>
     <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
-    <a href="/internal/engagement.html" class="nav-link">Engagement</a>
+    <a href="/internal/engagement.html" class="nav-link">Engagement Analytics</a>
     <a href="/internal/clients.html" class="nav-link">Clients</a>
     <a href="/internal/documents.html" class="nav-link">Documents</a>
     <a href="/internal/invoices.html" class="nav-link">Invoices</a>
@@ -186,6 +187,7 @@ const statusLabel = {
   called:     '<span class="badge badge-called">Called</span>',
   converted:  '<span class="badge badge-converted">Converted</span>',
   dismissed:  '<span class="badge badge-dismissed">Dismissed</span>',
+  archived:   '<span class="badge badge-dismissed">Archived</span>',
 };
 
 const sourceLabel = {
@@ -258,26 +260,46 @@ function renderIntakes(intakes) {
       <td>
         <div class="actions">
           <button class="btn-action" onclick="showDetail('${esc(i.id)}')">View</button>
-          ${i.status !== 'dismissed'
-            ? `<button class="btn-research ${i.status === 'researched' ? 'done' : ''}"
-                 id="btn-research-${esc(i.id)}"
-                 onclick="runResearch('${esc(i.id)}')">${i.status === 'researched' ? '&#10003; Re-run' : '&#9889; Research'}</button>
+          ${i.status !== 'dismissed' && i.status !== 'archived'
+            ? `<button class="btn-action" onclick="archive('${esc(i.id)}', this)">Archive</button>
+               <button class="btn-research ${i.status === 'researched' ? 'done' : ''}"
+                  id="btn-research-${esc(i.id)}"
+                  onclick="runResearch('${esc(i.id)}')">${i.status === 'researched' ? '&#10003; Re-run' : '&#9889; Research'}</button>
                <button class="btn-action danger" onclick="dismiss('${esc(i.id)}', this)">Dismiss</button>`
             : ''}
+          <button class="btn-action danger" onclick="deleteIntake('${esc(i.id)}', '${esc(i.company)}', this)">Delete</button>
         </div>
       </td>
     </tr>
   `).join('');
 }
 
-async function dismiss(id, btn) {
-  if (!confirm('Mark this intake as dismissed?')) return;
+async function archive(id, btn) {
+  if (!confirm('Move this intake to archives?')) return;
   btn.disabled = true;
   try {
     const res = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
-      body: JSON.stringify({ action: 'update-intake-status', id, status: 'dismissed' }),
+      body: JSON.stringify({ action: 'update-intake-status', id, status: 'archived' }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    await loadIntakes();
+  } catch (e) {
+    alert('Failed: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+async function deleteIntake(id, company, btn) {
+  if (!confirm(`Permanently delete intake for "${company}"? This cannot be undone.`)) return;
+  btn.disabled = true;
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'delete-intake', id }),
     });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error);

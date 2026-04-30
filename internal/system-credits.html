@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Stack — BW Advisory Solutions</title>
+<link rel="icon" type="image/webp" href="https://bwadvisorysolutions.com.au/shield.webp" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  background: #f5f7fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Nav ── */
+.nav {
+  background: #0F172A;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.nav-brand { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.nav-tag {
+  background: rgba(201,168,76,0.15);
+  color: #C9A84C;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-left: 12px;
+}
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-link { color: #C0C8D0; font-size: 13px; text-decoration: none; opacity: 0.75; transition: opacity 0.15s, color 0.15s; }
+.nav-link:hover { opacity: 1; color: #C9A84C; }
+.nav-link.active { opacity: 1; color: #C9A84C; font-weight: 600; }
+.btn-signout {
+  background: none; border: 1px solid rgba(255,255,255,0.2);
+  color: #C0C8D0; font-size: 12px; padding: 5px 12px;
+  border-radius: 4px; cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.btn-signout:hover { background: rgba(255,255,255,0.1); }
+
+/* ── Dashboard (post-login) ── */
+.dashboard { flex: 1; padding: 40px 48px; }
+.page-title { font-size: 24px; font-weight: 700; color: #0A1C42; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: #6a7a8a; margin-bottom: 36px; }
+
+/* Dashboard Cards Grid */
+.systems-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Summary Banner */
+.summary-banner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.summary-stat {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+.summary-stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.summary-stat-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.summary-stat.urgent .summary-stat-value { color: #dc2626; }
+.summary-stat.trials .summary-stat-value { color: #d97706; }
+.summary-stat.spend .summary-stat-value { color: #166534; }
+
+/* Category Sections */
+.category-section { margin-bottom: 36px; }
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e2e8f0;
+}
+.category-header.urgent-header { border-bottom-color: #fca5a5; background: #fff5f5; padding: 8px 12px; border-radius: 8px 8px 0 0; border: 1px solid #fca5a5; border-bottom: 2px solid #ef4444; margin-bottom: 14px; }
+.category-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.category-header.urgent-header .category-title { color: #dc2626; }
+.category-count {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Premium System Card Design */
+.system-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.system-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border-color: #C9A84C;
+}
+
+/* Gradient Top Bar */
+.system-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #0F172A, #1B6EC2);
+}
+
+.system-card.gcp::before { background: linear-gradient(90deg, #4285F4, #34A853); }
+.system-card.gcp-trial::before { background: linear-gradient(90deg, #4285F4, #34A853); }
+.system-card.anthropic::before { background: linear-gradient(90deg, #D97757, #E5C3A6); }
+.system-card.hubspot::before { background: linear-gradient(90deg, #FF7A59, #FF8F73); }
+.system-card.wise::before { background: linear-gradient(90deg, #37B07D, #9FE870); }
+.system-card.grammarly::before { background: linear-gradient(90deg, #15C39A, #00AC8C); }
+.system-card.netlify::before { background: linear-gradient(90deg, #00AD9F, #00C7B7); }
+.system-card.calendly::before { background: linear-gradient(90deg, #006BFF, #0055CC); }
+.system-card.microsoft365::before { background: linear-gradient(90deg, #F25022, #FFB900, #7FBA00, #00A4EF); }
+.system-card.chatgpt::before { background: linear-gradient(90deg, #10A37F, #1A7F64); }
+.system-card.protonmail::before { background: linear-gradient(90deg, #6D4AFF, #AA8FF0); }
+.system-card.godaddy::before { background: linear-gradient(90deg, #1BDBAD, #00A47B); }
+.system-card.wispr::before { background: linear-gradient(90deg, #7C3AED, #A855F7); }
+.system-card.granola::before { background: linear-gradient(90deg, #84CC16, #4D7C0F); }
+.system-card.google-apps::before { background: linear-gradient(90deg, #4285F4, #EA4335, #FBBC05, #34A853); }
+.system-card.teams::before { background: linear-gradient(90deg, #5059C9, #7B83EB); }
+.system-card.zoom::before { background: linear-gradient(90deg, #2D8CFF, #0E71EB); }
+.system-card.clarity::before { background: linear-gradient(90deg, #0078D4, #50E6FF); }
+.system-card.linkedin::before { background: linear-gradient(90deg, #0A66C2, #0077B5); }
+
+/* Clickable Details Card */
+.clickable-card {
+  cursor: pointer;
+}
+.clickable-card::after {
+  content: 'View details \u2197';
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1B6EC2;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.clickable-card:hover::after { opacity: 1; }
+
+/* Header Elements */
+.sys-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sys-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sys-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sys-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.sys-status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.sys-status.active { background: #dcfce7; color: #166534; }
+.sys-status.warning { background: #fef08a; color: #854d0e; }
+.sys-status.critical { background: #fee2e2; color: #991b1b; }
+
+/* Balance/Usage Display */
+.sys-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.sys-balance-wrapper {
+  margin-bottom: 8px;
+}
+
+.sys-balance {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.5px;
+}
+
+.sys-currency {
+  font-size: 18px;
+  color: #64748b;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.sys-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Progress Bar for Limits */
+.sys-progress-container {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.sys-progress-bar {
+  height: 100%;
+  background: #1B6EC2;
+  border-radius: 4px;
+  transition: width 1s ease-out;
+}
+
+.sys-progress-text {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Footer Details */
+.sys-footer {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+  font-size: 12px;
+  color: #94a3b8;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.sys-details {
+  max-width: 70%;
+  line-height: 1.4;
+}
+
+.sys-updated {
+  text-align: right;
+}
+
+/* Setup Placeholder Card */
+.setup-card {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px dashed #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.setup-card:hover {
+  background: #ffffff;
+  border-color: #94a3b8;
+}
+
+.setup-icon {
+  font-size: 24px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.setup-title {
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.setup-desc {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Loading State */
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.spinner {
+  border: 3px solid rgba(27, 110, 194, 0.1);
+  border-radius: 50%;
+  border-top: 3px solid #1B6EC2;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin-right: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .nav { padding: 0 16px; }
+  .dashboard { padding: 28px 16px; }
+  .systems-grid { grid-template-columns: 1fr; }
+}
+
+/* Modal for API Setup */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title { font-weight: 700; font-size: 18px; color: #0F172A; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; }
+.modal-close:hover { color: #0F172A; }
+
+.modal-body { padding: 24px; font-size: 14px; color: #475569; line-height: 1.6; }
+.modal-footer { padding: 16px 24px; background: #f8fafc; border-top: 1px solid #f1f5f9; text-align: right; }
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.btn-primary { background: #0F172A; color: #fff; }
+.btn-primary:hover { background: #1e293b; }
+.btn-secondary { background: #fff; border: 1px solid #cbd5e1; color: #475569; margin-right: 12px; }
+.btn-secondary:hover { background: #f8fafc; }
+
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div style="display:flex;align-items:center;">
+    <a href="/internal/" class="nav-brand">BW Advisory Solutions</a>
+    <span class="nav-tag">Internal</span>
+  </div>
+  <div class="nav-right" id="nav-links" style="display:none;">
+    <a href="/internal/" class="nav-link">Dashboard</a>
+    <a href="/internal/system-credits.html" class="nav-link active">Tech Stack</a>
+    <a href="/internal/ai-strategy.html" class="nav-link">AI Strategy</a>
+    <a href="/internal/intakes.html" class="nav-link">Intakes</a>
+    <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
+    <a href="/internal/engagement.html" class="nav-link">Engagement</a>
+    <a href="/internal/clients.html" class="nav-link">Clients</a>
+    <a href="/internal/documents.html" class="nav-link">Documents</a>
+    <a href="/internal/invoices.html" class="nav-link">Invoices</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard" style="display:none;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px;">
+    <div>
+      <div class="page-title">Tech Stack</div>
+      <div class="page-sub" style="margin-bottom:0;">All tools, subscriptions, API credits, and trials — organised by category.</div>
+    </div>
+    <a href="/internal/ai-strategy.html" style="background:#0F172A; color:#C9A84C; border:1px solid #C9A84C; padding:10px 18px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px; transition:all 0.2s;" onmouseover="this.style.background='#C9A84C'; this.style.color='#0F172A'" onmouseout="this.style.background='#0F172A'; this.style.color='#C9A84C'">
+      <span>🤖</span> Run Strategy Research
+    </a>
+  </div>
+
+  <!-- Summary Banner -->
+  <div class="summary-banner" id="summary-banner" style="display:none;">
+    <div class="summary-stat spend">
+      <div class="summary-stat-value" id="stat-spend">—</div>
+      <div class="summary-stat-label">Annual Spend</div>
+    </div>
+    <div class="summary-stat">
+      <div class="summary-stat-value" id="stat-tools">—</div>
+      <div class="summary-stat-label">Tools Tracked</div>
+    </div>
+    <div class="summary-stat trials">
+      <div class="summary-stat-value" id="stat-trials">—</div>
+      <div class="summary-stat-label">Active Trials</div>
+    </div>
+    <div class="summary-stat urgent">
+      <div class="summary-stat-value" id="stat-urgent">—</div>
+      <div class="summary-stat-label">Need Attention</div>
+    </div>
+  </div>
+
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    Loading system data...
+  </div>
+
+  <div id="systems-grid" style="display:none;">
+    <!-- Category sections populated by JS -->
+  </div>
+</div>
+
+<!-- Modal for System Setup -->
+<div class="modal-overlay" id="setup-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Configure Integration</div>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 16px;">To display real-time billing and usage data for external systems, specific API permissions or service accounts are required.</p>
+      
+      <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+        <h4 style="color: #0F172A; margin-bottom: 8px; font-size: 14px;">Google One AI Pro</h4>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">These are consumer AI credits tied to your personal Google One account. They cannot be programmatically fetched via Developer APIs, so this card serves as a manual tracker for your 1,000 monthly limit.</p>
+      </div>
+
+      <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+        <h4 style="color: #0F172A; margin-bottom: 8px; font-size: 14px;">Anthropic Claude Pro</h4>
+        <p style="font-size: 13px; color: #64748b;">Annual subscription · A$309.09 · Purchased 11/Apr/2026 · Expires 11/Apr/2027. Anthropic does not expose a public billing API, so this card tracks your subscription details manually.</p>
+      </div>
+
+      <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <h4 style="color: #0F172A; margin-bottom: 8px; font-size: 14px;">Wise API</h4>
+        <p style="font-size: 13px; color: #64748b;">Requires your <code>WISE_API_TOKEN</code> in the environment variables to fetch live borderless account balances from the Financial Hub.</p>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="window.open('https://app.netlify.com', '_blank')">Open Netlify Env</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for System Details (like GCP info) -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="detail-modal-title">Details</div>
+      <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="detail-modal-body">
+      <!-- Injected -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" style="margin-right:0;" onclick="closeDetailModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const CREDITS_API = '/.netlify/functions/credits-api';
+
+function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
+
+function signOut() {
+  sessionStorage.removeItem('brad_api_key');
+  window.location.href = '/internal/';
+}
+
+function openModal() {
+  document.getElementById('setup-modal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('setup-modal').style.display = 'none';
+}
+
+window.sysModals = {};
+
+function openDetailModal(id) {
+  const data = window.sysModals[id];
+  if (!data) return;
+  document.getElementById('detail-modal-title').textContent = data.title;
+  document.getElementById('detail-modal-body').innerHTML = data.content;
+  document.getElementById('detail-modal').style.display = 'flex';
+}
+
+function closeDetailModal() {
+  document.getElementById('detail-modal').style.display = 'none';
+}
+
+// Map system IDs to brand logos (Clearbit) with emoji fallback
+const LOGOS = {
+  'gcp':          { domain: 'google.com',          emoji: '✨' },
+  'gcp-trial':    { domain: 'cloud.google.com',     emoji: '☁️' },
+  'anthropic':    { domain: 'anthropic.com',        emoji: '🤖' },
+  'hubspot':      { domain: 'hubspot.com',          emoji: '🎯' },
+  'wise':         { domain: 'wise.com',             emoji: '🏦' },
+  'grammarly':    { domain: 'grammarly.com',        emoji: '✍️' },
+  'netlify':      { domain: 'netlify.com',          emoji: '🚀' },
+  'calendly':     { domain: 'calendly.com',         emoji: '📅' },
+  'microsoft365': { domain: 'microsoft.com',        emoji: '🪟' },
+  'chatgpt':      { domain: 'openai.com',           emoji: '🧩' },
+  'protonmail':   { domain: 'proton.me',            emoji: '📧' },
+  'godaddy':      { domain: 'godaddy.com',          emoji: '🌐' },
+  'wispr':        { domain: 'wisprflow.ai',         emoji: '🎤' },
+  'granola':      { domain: 'granola.ai',           emoji: '📝' },
+  'google-apps':  { domain: 'google.com',           emoji: '📬' },
+  'teams':        { domain: 'microsoft.com',        emoji: '💬' },
+  'zoom':         { domain: 'zoom.us',              emoji: '📹' },
+  'clarity':      { domain: 'microsoft.com',        emoji: '📈' },
+  'linkedin':     { domain: 'linkedin.com',         emoji: '💼' },
+  'grok':         { domain: 'x.ai',                emoji: '🔮' },
+};
+
+const getIcon = (id) => {
+  const entry = LOGOS[id];
+  if (!entry) return `<span style="font-size:18px;">🔌</span>`;
+  return `<img
+    src="https://logo.clearbit.com/${entry.domain}"
+    alt="${id}"
+    style="width:24px;height:24px;object-fit:contain;border-radius:3px;"
+    onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${entry.emoji}',style:'font-size:18px'}))"
+  >`;
+};
+
+function renderSystemCard(sys) {
+  let bodyHtml = '';
+
+  if (sys.type === 'credit') {
+    bodyHtml = `
+      <div class="sys-balance-wrapper">
+        <span class="sys-currency">${sys.currency === 'USD' ? '$' : sys.currency}</span><span class="sys-balance">${sys.balance.toFixed(2)}</span>
+      </div>
+      <div class="sys-label">Available Credit Balance</div>
+    `;
+  } else if (sys.type === 'limit') {
+    const percent = Math.min((sys.used / sys.limit) * 100, 100);
+    const barColor = percent > 90 ? '#ef4444' : percent > 75 ? '#f59e0b' : '#1B6EC2';
+    const limitLabel = sys.id === 'netlify' ? 'Monthly Plan Credits Used' : 'API Calls Used';
+    const resetLabel = sys.id === 'netlify' ? 'Resets monthly (30th)' : `Resets: ${new Date(sys.resetDate).toLocaleDateString()}`;
+
+    // Netlify: monthly plan cost badge
+    const costBadge = sys.id === 'netlify' && sys.costPerMonthUSD
+      ? `<span style="font-size:12px; color:#64748b; margin-left:8px;">USD $${sys.costPerMonthUSD.toFixed(2)}/mo (≈ A$${sys.costPerMonthAUD.toFixed(2)})</span>`
+      : sys.costPerMonth ? `<span style="font-size:12px; color:#64748b; margin-left:8px;">A$${sys.costPerMonth.toFixed(2)}/mo</span>` : '';
+
+    // Netlify: show add-on credit reserve
+    const addonBadge = sys.id === 'netlify' && sys.addonCredits
+      ? `<div style="margin-top:8px; font-size:12px; color:#475569;">
+          <span style="background:#f0fdf4; border:1px solid #bbf7d0; padding:2px 8px; border-radius:10px; color:#166534; font-weight:600;">
+            + ${sys.addonCredits} add-on credits in reserve
+          </span>
+         </div>`
+      : '';
+
+    const dashLink = sys.id === 'netlify' && sys.actionLink
+      ? `<a href="${sys.actionLink}" target="_blank" style="display:inline-block; margin-top:10px; font-size:12px; color:#1B6EC2; text-decoration:none; font-weight:600;">View Dashboard →</a>`
+      : '';
+
+    bodyHtml = `
+      <div class="sys-balance-wrapper">
+        <span class="sys-balance">${sys.used.toLocaleString()}</span> <span style="color: #94a3b8; font-size: 16px;">/ ${sys.limit.toLocaleString()}</span>${costBadge}
+      </div>
+      <div class="sys-label">${limitLabel}</div>
+      ${addonBadge}
+      <div class="sys-progress-container">
+        <div class="sys-progress-bar" style="width: ${percent}%; background-color: ${barColor}"></div>
+      </div>
+      <div class="sys-progress-text">
+        <span>${percent.toFixed(1)}% consumed</span>
+        <span>${resetLabel}</span>
+      </div>
+      ${dashLink}
+    `;
+  } else if (sys.type === 'usage') {
+     bodyHtml = `
+      <div class="sys-balance-wrapper">
+        <span class="sys-currency">${sys.currency === 'USD' ? '$' : sys.currency}</span><span class="sys-balance">${sys.balance.toFixed(2)}</span>
+      </div>
+      <div class="sys-label">Estimated Current Usage</div>
+    `;
+  } else if (sys.type === 'service') {
+    // One-time setup / fixed cost service
+    bodyHtml = `
+      <div class="sys-balance-wrapper">
+        <span class="sys-currency">A$</span><span class="sys-balance">${sys.cost.toFixed(2)}</span>
+      </div>
+      <div class="sys-label">One-time Setup Fee · Free ongoing use</div>
+      ${sys.actionLink ? `<a href="${sys.actionLink}" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:#1B6EC2; text-decoration:none; font-weight:600;">Open Wise →</a>` : ''}
+    `;
+  } else if (sys.type === 'free') {
+    // Free tier tool
+    bodyHtml = `
+      <div class="sys-balance-wrapper">
+        <span class="sys-balance" style="font-size:28px; color:#166534;">Free</span>
+      </div>
+      <div class="sys-label">Free Plan · No cost</div>
+      ${sys.actionLink ? `<a href="${sys.actionLink}" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:#1B6EC2; text-decoration:none; font-weight:600;">Open ${sys.name} →</a>` : ''}
+    `;
+  } else if (sys.type === 'trial') {
+    // Active trial — show days remaining prominently
+    const trialPct = Math.min(((sys.trialUsed || 0) / (sys.trialTotal || 14)) * 100, 100);
+    const daysLeft = sys.trialDaysLeft || 0;
+    const trialBarColor = daysLeft <= 1 ? '#ef4444' : daysLeft <= 3 ? '#f59e0b' : '#7C3AED';
+    const urgencyText = daysLeft <= 1 ? '🚨 Expires tomorrow — decide now!'
+      : daysLeft <= 3 ? `⚠️ ${daysLeft} days left — decision needed soon`
+      : `⏱ ${daysLeft} days remaining on trial`;
+    bodyHtml = `
+      <div class="sys-balance-wrapper">
+        <span class="sys-balance" style="color:${trialBarColor};">${daysLeft}</span>
+        <span style="color:#94a3b8; font-size:16px;"> days left</span>
+      </div>
+      <div class="sys-label">Free Trial · Click to view pricing options</div>
+      <div class="sys-progress-container">
+        <div class="sys-progress-bar" style="width:${trialPct}%; background-color:${trialBarColor};"></div>
+      </div>
+      <div class="sys-progress-text">
+        <span style="color:${trialBarColor}; font-weight:600;">${urgencyText}</span>
+      </div>
+    `;
+  } else if (sys.type === 'subscription') {
+    if (sys.cost) {
+      // Cost-based plan (e.g. Anthropic Claude Pro, Grammarly, Microsoft 365)
+      const expiry = sys.expiryDate ? new Date(sys.expiryDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+      const linkLabel = sys.id === 'grammarly' ? 'Open Grammarly'
+        : sys.id === 'anthropic' ? 'Open Claude'
+        : sys.id === 'microsoft365' ? 'Manage Subscription'
+        : sys.id === 'protonmail' ? 'Manage Plan'
+        : sys.id === 'godaddy' ? 'Manage Domain'
+        : sys.id === 'linkedin' ? 'Open LinkedIn Learning'
+        : 'Open App';
+      const daysWarning = sys.daysLeft && sys.daysLeft < 60 ? `<div style="margin-top:8px; font-size:12px; color:${sys.daysLeft < 30 ? '#dc2626' : '#d97706'}; font-weight:600;">⚠️ Renews in ${sys.daysLeft} days</div>` : '';
+      bodyHtml = `
+        <div class="sys-balance-wrapper">
+          <span class="sys-currency">A$</span><span class="sys-balance">${sys.cost.toFixed(2)}</span>
+        </div>
+        <div class="sys-label">${sys.plan || 'Pro'} Plan · Annual Subscription${sys.costUSD ? ` <span style="color:#94a3b8;">(USD $${sys.costUSD.toFixed(2)})</span>` : ''}</div>
+        ${expiry ? `<div style="margin-top:10px; font-size:13px; color:#64748b;">Expires <strong style="color:#0F172A;">${expiry}</strong></div>` : ''}
+        ${daysWarning}
+        ${sys.actionLink ? `<a href="${sys.actionLink}" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:#1B6EC2; text-decoration:none; font-weight:600;">${linkLabel} &rarr;</a>` : ''}
+      `;
+    } else {
+      // Credit-limit plan (e.g. Google One AI Credits)
+      bodyHtml = `
+        <div class="sys-balance-wrapper">
+          <span class="sys-balance">${sys.limit.toLocaleString()}</span> <span style="color: #94a3b8; font-size: 16px;">/ month</span>
+        </div>
+        <div class="sys-label">Allocated AI Credits</div>
+        ${sys.actionLink ? `<a href="${sys.actionLink}" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:#1B6EC2; text-decoration:none; font-weight:600;">Open Gemini &rarr;</a>` : ''}
+        ${sys.actionLink2 ? `<a href="${sys.actionLink2}" target="_blank" style="display:inline-block; margin-top:6px; margin-left:12px; font-size:12px; color:#64748b; text-decoration:none; font-weight:600;">Manage Plan &rarr;</a>` : ''}
+      `;
+    }
+  }
+
+  const dateStr = new Date(sys.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if (sys.modalContent) {
+    window.sysModals[sys.id] = { title: sys.name, content: sys.modalContent };
+  }
+  const clickHandler = sys.modalContent ? `onclick="openDetailModal('${sys.id}')"` : '';
+  const hoverClass = sys.modalContent ? 'clickable-card' : '';
+
+  return `
+    <div class="system-card ${sys.id} ${hoverClass}" ${clickHandler}>
+      <div class="sys-header">
+        <div class="sys-name">
+          <div class="sys-icon">${getIcon(sys.id)}</div>
+          ${sys.name}
+        </div>
+        <div class="sys-status ${sys.status}">${sys.status}</div>
+      </div>
+      <div class="sys-body">
+        ${bodyHtml}
+      </div>
+      <div class="sys-footer">
+        <div class="sys-details">${sys.details}</div>
+        <div class="sys-updated">Updated<br>${dateStr}</div>
+      </div>
+    </div>
+  `;
+}
+
+// Category mapping (client-side, avoids API changes)
+const getCategory = (id) => {
+  const map = {
+    anthropic: 'ai', chatgpt: 'ai', gcp: 'ai', grok: 'ai',
+    grammarly: 'productivity', microsoft365: 'productivity', wispr: 'productivity', granola: 'productivity',
+    protonmail: 'communication', 'google-apps': 'communication', teams: 'communication', zoom: 'communication',
+    hubspot: 'infrastructure', netlify: 'infrastructure', calendly: 'infrastructure', godaddy: 'infrastructure', 'gcp-trial': 'infrastructure', clarity: 'infrastructure',
+    wise: 'finance',
+    linkedin: 'productivity',
+  };
+  return map[id] || 'other';
+};
+
+const CATEGORY_META = {
+  ai:             { label: '🤖 AI & Intelligence',            order: 1 },
+  productivity:   { label: '✍️ Productivity & Writing',        order: 2 },
+  communication:  { label: '📧 Communication & Collaboration', order: 3 },
+  infrastructure: { label: '🏗️ Infrastructure & Dev',          order: 4 },
+  finance:        { label: '💰 Finance',                       order: 5 },
+  other:          { label: '🔌 Other Tools',                   order: 6 },
+};
+
+function renderSection(title, items, isUrgent = false) {
+  if (!items.length) return '';
+  return `
+    <div class="category-section">
+      <div class="category-header ${isUrgent ? 'urgent-header' : ''}">
+        <div class="category-title">${title}</div>
+        <span class="category-count">${items.length} tool${items.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="systems-grid">
+        ${items.map(sys => renderSystemCard(sys)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+async function init() {
+  const key = getKey();
+  if (!key) {
+    window.location.href = '/internal/';
+    return;
+  }
+
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('nav-links').style.display = 'flex';
+
+  try {
+    const res = await fetch(CREDITS_API, {
+      headers: { 'x-portal-api-key': key }
+    });
+
+    if (res.status === 401) { signOut(); return; }
+
+    const data = await res.json();
+    document.getElementById('loading').style.display = 'none';
+
+    const grid = document.getElementById('systems-grid');
+    grid.style.display = 'block';
+
+    if (data.ok && data.systems) {
+      const systems = data.systems;
+
+      // Summary stats
+      const annualSpend = systems.reduce((sum, s) => {
+        if (s.cost) {
+          // Pro-rate based on billing cycle
+          if (s.billingCycle === '3-year') return sum + (s.cost / 3);
+          return sum + s.cost;
+        }
+        if (s.costPerMonthAUD) {
+          return sum + (s.costPerMonthAUD * 12);
+        }
+        return sum;
+      }, 0);
+      
+      const urgentItems = systems.filter(s => 
+        s.type === 'trial' || 
+        s.status === 'critical' || 
+        (s.status === 'warning' && s.daysLeft && s.daysLeft < 60)
+      );
+      const trialCount = systems.filter(s => s.type === 'trial').length;
+
+      document.getElementById('stat-spend').textContent = `A$${Math.round(annualSpend).toLocaleString()}`;
+      document.getElementById('stat-tools').textContent = systems.length;
+      document.getElementById('stat-trials').textContent = trialCount;
+      document.getElementById('stat-urgent').textContent = urgentItems.length;
+      document.getElementById('summary-banner').style.display = 'grid';
+
+      // Group by category
+      const grouped = {};
+      for (const cat of Object.keys(CATEGORY_META)) grouped[cat] = [];
+      for (const sys of systems) {
+        const cat = getCategory(sys.id);
+        (grouped[cat] = grouped[cat] || []).push(sys);
+      }
+
+      let html = '';
+
+      // Urgent section first
+      if (urgentItems.length > 0) {
+        html += renderSection('⚠️ Urgent Attention Required', urgentItems, true);
+      }
+
+      // Category sections in order
+      const sortedCats = Object.entries(CATEGORY_META).sort((a,b) => a[1].order - b[1].order);
+      for (const [cat, meta] of sortedCats) {
+        if (grouped[cat] && grouped[cat].length > 0) {
+          html += renderSection(meta.label, grouped[cat]);
+        }
+      }
+
+      // Setup card
+      html += `
+        <div class="category-section">
+          <div class="systems-grid">
+            <div class="system-card setup-card" onclick="openModal()">
+              <div class="setup-icon">➕</div>
+              <div class="setup-title">Configure System</div>
+              <div class="setup-desc">Add API keys or Service Accounts to connect more platforms</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      grid.innerHTML = html;
+    }
+
+  } catch (err) {
+    console.error('Failed to load credits:', err);
+    document.getElementById('loading').innerHTML = `
+      <div style="color: #ef4444; text-align: center;">
+        <div style="font-size: 24px; margin-bottom: 8px;">⚠️</div>
+        Failed to load systems data.<br>Please check your connection and try again.
+      </div>
+    `;
+  }
+}
+
+// Start
+init();
+
+</script>
+</body>
+</html>

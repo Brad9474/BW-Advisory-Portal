@@ -149,6 +149,56 @@ body {
 }
 .dash-card-count span { font-size: 13px; font-weight: 400; color: #9aaabb; margin-left: 4px; }
 
+/* ── Strategic Overlay ── */
+.briefing-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.4s ease-out;
+}
+.briefing-card {
+  background: linear-gradient(135deg, #1E293B, #0F172A);
+  border: 1px solid #C9A84C;
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 700px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+  position: relative;
+  overflow: hidden;
+}
+.briefing-card::after {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 300px; height: 300px;
+  background: #C9A84C;
+  filter: blur(150px);
+  opacity: 0.1;
+  pointer-events: none;
+}
+.pulse-dot {
+  width: 8px; height: 8px;
+  background: #C9A84C;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 6px;
+  box-shadow: 0 0 10px #C9A84C;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(201, 168, 76, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(201, 168, 76, 0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 @media (max-width: 560px) {
   .nav { padding: 0 16px; }
   .dashboard { padding: 28px 16px; }
@@ -163,9 +213,12 @@ body {
     <span class="nav-tag">Internal</span>
   </div>
   <div class="nav-right" id="nav-links" style="display:none;">
+    <a href="/internal/" class="nav-link">Dashboard</a>
+    <a href="/internal/system-credits.html" class="nav-link">Tech Stack</a>
+    <a href="/internal/ai-strategy.html" class="nav-link">AI Strategy <span class="pulse-dot"></span></a>
     <a href="/internal/intakes.html" class="nav-link">Intakes</a>
     <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
-    <a href="/internal/engagement.html" class="nav-link">Engagement</a>
+    <a href="/internal/engagement.html" class="nav-link">Engagement Analytics</a>
     <a href="/internal/clients.html" class="nav-link">Clients</a>
     <a href="/internal/documents.html" class="nav-link">Documents</a>
     <a href="/internal/invoices.html" class="nav-link">Invoices</a>
@@ -273,6 +326,12 @@ body {
         <div class="dash-card-body">Documents uploaded and sent to clients — with download and preview tracking.</div>
         <div class="dash-card-count" id="count-docs">— <span>documents</span></div>
       </a>
+      <a href="/internal/system-credits.html" class="dash-card" style="border-left-color: #C9A84C;">
+        <div class="dash-card-label" style="color: #C9A84C;">System Integrations</div>
+        <div class="dash-card-title">Tech Stack</div>
+        <div class="dash-card-body">All tools, subscriptions, API credits, trials &amp; free tools — organised by category with spend tracking.</div>
+        <div class="dash-card-count">3 <span>systems</span></div>
+      </a>
     </div>
   </div>
 </div>
@@ -281,6 +340,7 @@ body {
 'use strict';
 const API = '/.netlify/functions/portal-api';
 const DASH_API = '/.netlify/functions/portal-dashboard-api';
+const STATUS_API = '/.netlify/functions/portal-status-api';
 
 function getKey() { return sessionStorage.getItem('brad_api_key') || ''; }
 
@@ -323,6 +383,38 @@ async function showDashboard() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   document.getElementById('nav-links').style.display = 'flex';
+  
+  // TRIGGER STRATEGIC OVERLAY
+  setTimeout(async () => {
+    try {
+      const res = await fetch(STATUS_API, { headers: { 'x-portal-api-key': getKey() } });
+      const data = await res.json();
+      if (data.ok) {
+        document.getElementById('status-ops').textContent = `${data.businessHealth.operations.pendingActions} Actions Required`;
+        
+        // Financials
+        document.getElementById('status-revenue').textContent = data.businessHealth.financial.revenueYTD;
+        document.getElementById('status-expenses').textContent = data.businessHealth.financial.expensesYTD;
+        document.getElementById('status-finance').textContent = data.businessHealth.financial.outstanding;
+        
+        // Render Outstanding Ledger
+        if (data.businessHealth.financial.outstandingItems) {
+          const list = data.businessHealth.financial.outstandingItems.map(item => `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+              <span>${item.client}</span>
+              <span style="color: #fff;">${item.amount}</span>
+            </div>
+          `).join('');
+          document.getElementById('status-finance-list').innerHTML = list;
+        }
+
+        document.getElementById('status-scout').textContent = data.businessHealth.strategy.latestAlert;
+        document.getElementById('status-bottom-line').textContent = data.bottomLine;
+        document.getElementById('briefing-overlay').style.display = 'flex';
+      }
+    } catch (err) { console.warn('Status Overlay Fetch Failed:', err); }
+  }, 800);
+
   loadCounts();
 }
 
@@ -429,5 +521,58 @@ if (getKey()) {
     .catch(() => {});
 }
 </script>
+<!-- Strategic Briefing Overlay (The Glass Box) -->
+<div id="briefing-overlay" class="briefing-overlay" style="display: none;">
+  <div class="briefing-card" style="max-width: 850px;">
+    <div style="font-size: 11px; font-weight: 700; color: #C9A84C; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px;">Autonomous Business Briefing</div>
+    
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 40px;">
+      <!-- Operations -->
+      <div>
+        <div style="font-size: 10px; color: #94A3B8; text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Operations</div>
+        <div style="font-size: 20px; font-weight: 700; color: #fff;" id="status-ops">2 Actions Required</div>
+        <div style="font-size: 12px; color: #C9A84C; margin-top: 4px;">Pending Diags / Intakes</div>
+      </div>
+      <!-- Finance -->
+      <div>
+        <div style="font-size: 10px; color: #94A3B8; text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Financial Pulse (FY)</div>
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 10px; color: #94A3B8;">Revenue</div>
+            <div style="font-size: 16px; font-weight: 700; color: #fff;" id="status-revenue">A$142.5k</div>
+          </div>
+          <div>
+            <div style="font-size: 10px; color: #94A3B8;">Expenses</div>
+            <div style="font-size: 16px; font-weight: 700; color: #fff;" id="status-expenses">A$42.1k</div>
+          </div>
+        </div>
+        <div style="font-size: 10px; color: #94A3B8; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Outstanding</div>
+        <div style="font-size: 18px; font-weight: 700; color: #C9A84C; margin-bottom: 8px;" id="status-finance">A$3,120</div>
+        <div style="font-size: 11px; color: #94A3B8;" id="status-finance-list">
+          <!-- Items injected here -->
+        </div>
+      </div>
+      <!-- Innovation -->
+      <div>
+        <div style="font-size: 10px; color: #94A3B8; text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Innovation Scout</div>
+        <div style="font-size: 20px; font-weight: 700; color: #fff;" id="status-scout">Claude 3.7</div>
+        <div style="font-size: 12px; color: #C9A84C; margin-top: 4px;">New Trial Recommended</div>
+      </div>
+    </div>
+
+    <div style="background: rgba(201, 168, 76, 0.05); border: 1px solid rgba(201, 168, 76, 0.2); border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+      <div style="font-size: 13px; color: #fff; font-weight: 700; margin-bottom: 8px;">Executive Summary (The Bottom Line)</div>
+      <div style="font-size: 15px; color: #94A3B8; line-height: 1.6;" id="status-bottom-line">
+        Your business is healthy. Priority: Convert the 2 pending diagnostics to active clients to hit your A$20k quarterly milestone.
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 16px;">
+      <button class="btn-login" style="flex: 1;" onclick="document.getElementById('briefing-overlay').style.display='none'">Continue to Workspace</button>
+      <button class="btn-signout" style="flex: 0 0 auto; height: 44px; border-radius: 7px;" onclick="location.href='/internal/ai-strategy.html'">Detailed Strategy</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

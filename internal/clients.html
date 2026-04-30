@@ -93,8 +93,9 @@ tr:hover td { background: #fafbfd; }
   <div class="nav-links">
     <a href="/internal/" class="nav-link">Dashboard</a>
     <a href="/internal/intakes.html" class="nav-link">Intakes</a>
+    <a href="/internal/ai-strategy.html" class="nav-link">AI Strategy</a>
     <a href="/internal/diagnostics.html" class="nav-link">Diagnostics</a>
-    <a href="/internal/engagement.html" class="nav-link">Engagement</a>
+    <a href="/internal/engagement.html" class="nav-link">Engagement Analytics</a>
     <a href="/internal/clients.html" class="nav-link active">Clients</a>
     <a href="/internal/documents.html" class="nav-link">Documents</a>
     <a href="/internal/invoices.html" class="nav-link">Invoices</a>
@@ -159,10 +160,10 @@ tr:hover td { background: #fafbfd; }
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>Name</th><th>Email</th><th>Sector</th><th>Status</th><th>Added</th><th></th></tr>
+        <tr><th>Name</th><th>Email</th><th>Sector</th><th>Status</th><th>Added</th><th>Activated</th><th></th></tr>
       </thead>
       <tbody id="clients-body">
-        <tr><td colspan="6" class="state-msg">Loading…</td></tr>
+        <tr><td colspan="7" class="state-msg">Loading…</td></tr>
       </tbody>
     </table>
   </div>
@@ -179,7 +180,25 @@ tr:hover td { background: #fafbfd; }
       <button class="btn-copy" onclick="copyLink()">Copy</button>
     </div>
     <div class="modal-actions">
-      <button class="btn-close" onclick="closeModal()">Close</button>
+      <button class="btn-close" onclick="closeModal('modal-link')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Client Detail Modal -->
+<div class="modal-backdrop" id="modal-detail">
+  <div class="modal" style="width: 600px;">
+    <div class="modal-title" id="det-title">Client Detail</div>
+    <div class="modal-sub" id="det-sub"></div>
+    
+    <div class="field" style="margin-top: 20px;">
+      <label>Strategic Notes & Key Details</label>
+      <textarea id="det-notes" style="width: 100%; height: 150px; padding: 12px; border: 1.5px solid #dde4ed; border-radius: 6px; font-family: inherit; font-size: 14px; resize: vertical;" placeholder="Add internal notes about this client relationship..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" id="btn-save-notes" onclick="saveNotes()">Save Notes</button>
+      <button class="btn-close" onclick="closeModal('modal-detail')" style="margin-left: 8px;">Close</button>
     </div>
   </div>
 </div>
@@ -264,7 +283,10 @@ async function loadClients() {
       const st = c.status || 'active';
       return `
       <tr>
-        <td><div class="client-name">${esc(c.name)}</div>${c.organisation?`<div class="client-org">${esc(c.organisation)}</div>`:''}</td>
+        <td>
+          <div class="client-name" style="cursor:pointer; color:#1B6EC2; text-decoration:underline;" onclick="showClientDetail('${esc(c.id)}')">${esc(c.name)}</div>
+          ${c.organisation?`<div class="client-org">${esc(c.organisation)}</div>`:''}
+        </td>
         <td>${esc(c.email)}</td>
         <td>${esc(c.sector||'—')}</td>
         <td>
@@ -274,7 +296,8 @@ async function loadClients() {
             <option value="archived" ${st==='archived' ?'selected':''}>Archived</option>
           </select>
         </td>
-        <td>${fmtDate(c.createdAt)}</td>
+        <td style="font-size:12px;">${fmtDate(c.createdAt)}</td>
+        <td>${c.activatedAt ? `<span class="badge-active" style="font-size:10px;">${fmtDate(c.activatedAt)}</span>` : '<span style="color:#999;font-size:11px;">Pending</span>'}</td>
         <td style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="action-btn" id="btn-link-${esc(c.id)}" onclick="sendLink('${esc(c.id)}', '${esc(c.name)}', '${esc(c.email)}')">Send login link</button>
           <button class="action-btn danger" onclick="deleteClient('${esc(c.id)}', '${esc(c.name)}', this)">Delete</button>
@@ -373,12 +396,53 @@ function copyLink() {
   setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
 }
 
-function closeModal() {
-  document.getElementById('modal-link').classList.remove('open');
+function closeModal(id) {
+  document.getElementById(id || 'modal-link').classList.remove('open');
 }
 
-document.getElementById('modal-link').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
+// ── Client Detail ─────────────────────────────────────────────────────────────
+let currentDetailId = null;
+let allClients = []; // Added to global state
+
+async function showClientDetail(id) {
+  const res = await fetch(`${API}?action=get-clients`, { headers: { 'x-portal-api-key': getKey() } });
+  const json = await res.json();
+  if (!json.ok) return;
+  allClients = json.clients;
+  
+  const c = allClients.find(x => x.id === id);
+  if (!c) return;
+
+  currentDetailId = id;
+  document.getElementById('det-title').textContent = c.name;
+  document.getElementById('det-sub').textContent   = `${c.organisation || ''} (${c.email})`;
+  document.getElementById('det-notes').value      = c.notes || '';
+  
+  document.getElementById('modal-detail').classList.add('open');
+}
+
+async function saveNotes() {
+  if (!currentDetailId) return;
+  const notes = document.getElementById('det-notes').value.trim();
+  const btn = document.getElementById('btn-save-notes');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-portal-api-key': getKey() },
+      body: JSON.stringify({ action: 'update-client', id: currentDetailId, notes }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    closeModal('modal-detail');
+    await loadClients();
+  } catch (e) { alert('Failed: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Save Notes'; }
+}
+
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(e.target.id); });
 });
 
 loadClients();
