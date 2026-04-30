@@ -94,7 +94,7 @@ export default async (req) => {
 
       try {
         // Get financial data from Hub
-        const hubData = await hubCall({ action: 'get-state' });
+        const hubData = await hubCall('get-state');
         const invoices = (hubData.state?.invoices || []);
         const transactions = (hubData.state?.transactions || []);
 
@@ -275,7 +275,7 @@ export default async (req) => {
         const diagnostics = await listDiagnostics(diagStore);
         const clients = await loadStore(store, 'clients');
 
-        const hubData = await hubCall({ action: 'get-state' });
+        const hubData = await hubCall('get-state');
         const invoices = (hubData.state?.invoices || []);
 
         // Count by stage
@@ -316,7 +316,7 @@ export default async (req) => {
       if (authErr) return jsonResponse(authErr, 401);
 
       try {
-        const hubData = await hubCall({ action: 'get-state' });
+        const hubData = await hubCall('get-state');
         const invoices = (hubData.state?.invoices || []);
 
         const now = new Date();
@@ -390,7 +390,7 @@ export default async (req) => {
         const clientDocs = docs.filter(d => d.clientId === clientId);
 
         // Get invoices
-        const hubData = await hubCall({ action: 'get-state' });
+        const hubData = await hubCall('get-state');
         const invoices = (hubData.state?.invoices || []).filter(
           inv => inv.clientId === clientId || inv.clientEmail === client.email
         );
