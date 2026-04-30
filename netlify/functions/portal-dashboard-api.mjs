@@ -96,26 +96,22 @@ export default async (req) => {
         // Get financial data from Hub
         const hubData = await hubCall({ action: 'get-state' });
         const invoices = (hubData.state?.invoices || []);
+        const transactions = (hubData.state?.transactions || []);
 
         // Calculate metrics
         const now = new Date();
         const currentYear = now.getFullYear();
         const ytdStart = new Date(now.getMonth() >= 6 ? currentYear : currentYear - 1, 6, 1);
 
-        let revenueYTD = 0;
-        let outstanding = 0;
-        const paidInvoices = [];
-
-        invoices.forEach(inv => {
-          const invDate = new Date(inv.date);
-          if (invDate >= ytdStart && inv.status === 'paid') {
-            revenueYTD += inv.total || 0;
-            paidInvoices.push(inv);
-          }
-          if (inv.status === 'pending' || inv.status === 'overdue' || inv.status === 'due') {
-            outstanding += inv.total || 0;
-          }
-        });
+        // Revenue from Transactions (INCOME)
+        const revenueYTD = transactions
+          .filter(t => t.type === 'INCOME' && new Date(t.date) >= ytdStart)
+          .reduce((sum, t) => sum + (t.amount || 0), 0);
+        
+        // Outstanding (Anything NOT paid)
+        const outstanding = invoices
+          .filter(inv => inv.status !== 'paid')
+          .reduce((sum, inv) => sum + (inv.total || 0), 0);
 
         // Get pending diagnostics
         const diagnostics = await listDiagnostics(diagStore);
@@ -296,8 +292,10 @@ export default async (req) => {
         };
 
         // Calculate approximate revenue progression
-        const paidInvoices = invoices.filter(i => i.status === 'paid');
-        const totalRevenue = paidInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+        const transactions = (hubData.state?.transactions || []);
+        const totalRevenue = transactions
+          .filter(t => t.type === 'INCOME')
+          .reduce((sum, t) => sum + (t.amount || 0), 0);
 
         return jsonResponse({
           ok: true,
@@ -325,27 +323,27 @@ export default async (req) => {
         const currentYear = now.getFullYear();
         const ytdStart = new Date(now.getMonth() >= 6 ? currentYear : currentYear - 1, 6, 1);
 
-        let revenueYTD = 0;
-        let outstandingAmount = 0;
-        let aged30 = 0, aged60 = 0, aged90 = 0;
+        const transactions = (hubData.state?.transactions || []);
         const invoicesByMonth = {};
 
-        invoices.forEach(inv => {
-          const invDate = new Date(inv.date);
+        // Revenue from Transactions
+        const revenueTransactions = transactions.filter(t => t.type === 'INCOME' && new Date(t.date) >= ytdStart);
+        const revenueYTD = revenueTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+        
+        revenueTransactions.forEach(t => {
+          const mKey = new Date(t.date).toISOString().slice(0, 7);
+          invoicesByMonth[mKey] = (invoicesByMonth[mKey] || 0) + (t.amount || 0);
+        });
+
+        const outstandingInvoices = invoices.filter(inv => inv.status !== 'paid');
+        const outstandingAmount = outstandingInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+        
+        let aged30 = 0, aged60 = 0, aged90 = 0;
+        outstandingInvoices.forEach(inv => {
           const daysOverdue = Math.floor((now - new Date(inv.due)) / (1000 * 60 * 60 * 24));
-
-          if (invDate >= ytdStart && inv.status === 'paid') {
-            revenueYTD += inv.total || 0;
-            const monthKey = invDate.toISOString().slice(0, 7); // YYYY-MM
-            invoicesByMonth[monthKey] = (invoicesByMonth[monthKey] || 0) + inv.total;
-          }
-
-          if (inv.status === 'pending' || inv.status === 'overdue') {
-            outstandingAmount += inv.total || 0;
-            if (daysOverdue > 90) aged90 += inv.total || 0;
-            else if (daysOverdue > 60) aged60 += inv.total || 0;
-            else if (daysOverdue > 30) aged30 += inv.total || 0;
-          }
+          if (daysOverdue > 90) aged90 += inv.total || 0;
+          else if (daysOverdue > 60) aged60 += inv.total || 0;
+          else if (daysOverdue > 30) aged30 += inv.total || 0;
         });
 
         return jsonResponse({

@@ -33,23 +33,26 @@ export const handler = async (event, context) => {
     const hubData = await hubCall({ action: 'get-state' });
     const state = hubData.state || {};
     const invoices = state.invoices || [];
+    const transactions = state.transactions || [];
     
-    // Calculate Outstanding
-    const unpaid = invoices.filter(inv => inv.status === 'due' || inv.status === 'overdue');
+    // Calculate Outstanding (Anything NOT paid)
+    const unpaid = invoices.filter(inv => inv.status !== 'paid');
     const outstandingTotal = unpaid.reduce((sum, inv) => sum + (inv.total || 0), 0);
     
-    // Calculate YTD (Assume July 1st start for AU Financial Year)
+    // Calculate YTD (AU Financial Year: July 1st)
     const now = new Date();
     const currentYear = now.getFullYear();
     const fyStart = new Date(now.getMonth() >= 6 ? currentYear : currentYear - 1, 6, 1);
     
-    const fyInvoices = invoices.filter(inv => new Date(inv.date) >= fyStart);
-    const revenueYTD = fyInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+    // Revenue from Transactions (INCOME)
+    const revenueYTD = transactions
+      .filter(t => t.type === 'INCOME' && new Date(t.date) >= fyStart)
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
     
-    const expenses = state.expenses || [];
-    const expensesYTD = expenses
-      .filter(exp => new Date(exp.date) >= fyStart)
-      .reduce((sum, exp) => sum + (exp.amount || 0), 0);
+    // Expenses from Transactions (EXPENSE)
+    const expensesYTD = transactions
+      .filter(t => t.type === 'EXPENSE' && new Date(t.date) >= fyStart)
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     const netProfit = revenueYTD - expensesYTD;
 
@@ -58,8 +61,8 @@ export const handler = async (event, context) => {
       const diff = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
       return {
         client: inv.client || 'Unknown',
-        amount: `A$${inv.total.toLocaleString()}`,
-        age: diff < 0 ? `${Math.abs(diff)} days overdue` : `Due in ${diff} days`
+        amount: `A$${(inv.total || 0).toLocaleString()}`,
+        age: diff < 0 ? `${Math.abs(diff)} days overdue` : (diff === 0 ? 'Due today' : `Due in ${diff} days`)
       };
     });
 
